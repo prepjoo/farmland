@@ -13,7 +13,7 @@ const METHODS = [
 ];
 const MBTI = ['ISTJ', 'ISFJ', 'INFJ', 'INTJ', 'ISTP', 'ISFP', 'INFP', 'INTP', 'ESTP', 'ESFP', 'ENFP', 'ENTP', 'ESTJ', 'ESFJ', 'ENFJ', 'ENTJ'];
 
-export default function MeaningPicker({ onChosen }) {
+export default function MeaningPicker({ onChosen, buttonLabel = '맞는 지역 보기' }) {
   const [method, setMethod] = useState('date');
   const [date, setDate] = useState('');
   const [phone, setPhone] = useState('010-');
@@ -67,7 +67,7 @@ export default function MeaningPicker({ onChosen }) {
             <span className="tiny muted">글자마다 알파벳 순서 두 자리로 바꿔요(예: ESTJ → 05·19·20·10).</span>
           </label>
         )}
-        <button type="button" className="cta" disabled={!digits || busy} onClick={showCandidates}>{busy ? '찾는 중…' : '맞는 지역 보기'}</button>
+        <button type="button" className="cta" disabled={!digits || busy} onClick={showCandidates}>{busy ? '찾는 중…' : buttonLabel}</button>
         {error && <p className="warn" role="alert">{error}</p>}
       </section>
 
@@ -92,14 +92,14 @@ export default function MeaningPicker({ onChosen }) {
 }
 
 /** 고른 곳 표시 줄 */
-export function ChosenBar({ chosen, onChange }) {
+export function ChosenBar({ chosen, onChange, label = '고른 곳', changeLabel = '다른 곳 고르기' }) {
   return (
     <div className="chosen-bar">
       <div>
-        <span className="tiny muted">고른 곳</span>
+        <span className="tiny muted">{label}</span>
         <p><strong>{chosen.place}</strong> <NationalPointBadge np={{ text: chosen.npShown }} /></p>
       </div>
-      <button type="button" className="ghost small" onClick={onChange}>다른 곳 고르기</button>
+      <button type="button" className="ghost small" onClick={onChange}>{changeLabel}</button>
     </div>
   );
 }

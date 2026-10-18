@@ -110,3 +110,13 @@
 - `kakaoSearchUrl(q)` → `https://map.kakao.com/link/search/<q>` (판매점: ‘상호 시·군·구’).
 - `withDistanceFromMe(me, items, pointOf)` → 각 항목에 `fromMeKm`(직선, 소수 1자리). `fromMeText(km)`로 문장.
 - 위치: [내 위치에서 거리 보기]를 누를 때만 `getCurrentPosition` 한 번. 화면 메모리에만 두고 저장·전송하지 않는다. 링크는 `target=_blank rel="noopener noreferrer"`.
+
+## 8. 메인 개편: 여기 · 행복 · 행운 (2026-10-19, 이 장이 5·7장보다 우선)
+- 화면: `screens/Home.jsx`(카드 3개), `screens/Happy.jsx`(#/happy/<pos|message|place>), `screens/Luck.jsx`(#/luck/<pos|number|place>), `screens/Meet.jsx`(#/meet), `screens/Here.jsx`(#/here ‘여긴 어디?’).
+- 행복메시지 `engine/fortune.js`: `todayTarot`(0~21, 'fl-tarot-v1') · `todayHexagram`(1~64, 'fl-iching-v1') · `todayZodiac`(0~11, 'fl-zodiac-v1'), 모두 SHA-256(규칙 | 한국 날짜 | 행복위치 국가지점번호). `MESSAGE_KINDS`. 회전판 `components/Roulette.jsx`는 `go`가 참이 될 때만 돈다(동작 줄이기면 바로 멈춘 칸).
+- 점성술 자료 `public/data/zodiac.json`: 12궁 이름·기호·날짜·원소·특성·지배 행성·전통 풀이·조언. 놀이용 추첨(생일 별자리 아님). 문장은 콘텐츠 검수 필요.
+- 오늘의 국가지점: 조언을 다 보면 나오는 칸. 행복위치 + 미션(`recordVisit`).
+- 만남 장소 `engine/meet.js` `meetPlaces({a, b, places})`: 각 장소에 fromA·fromB(km), 정렬 = max(fromA, fromB) → |차| → 합 → id. 후보는 두 사람 가운데에서 반경 min(80, max(10, 거리/2+10))km 안의 TourAPI 관광지(places) 또는 음식점(food, cafe 여부로 맛집·카페). 부품 `components/MeetPlaces.jsx`.
+- 행운지점: ‘국가지점으로 현재 위치’(getCurrentPosition 한 번 → `toNationalPoint` → `lookupOne`) 또는 `MeaningPicker`(버튼 ‘위치찾기’). 행운위치는 화면 메모리에만.
+- 행운번호: `weeklyNumbers({round, np})` 5게임을 [추첨]마다 하나씩 보여 준다. 저장 없음(다시 오면 0게임부터, 번호는 같음).
+- 행운장소: [행운장소] → `nearestStores`. [출발] → `kakaoFromToUrl(행운위치, 구 대표 지점)` (형식 확인 필요) + `kakaoSearchUrl(상호 시·군·구)`.

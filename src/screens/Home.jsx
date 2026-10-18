@@ -1,30 +1,45 @@
-// 첫 화면: 주요 기능 두 개(오늘 · 이번 주)를 크게 (2026-10-18 구조 변경)
+// 메인: 여기 · 행복 · 행운 카드 3개 (2026-10-19 사용자 시안). 카드마다 바로가기 단추와 할 수 있는 일 목록.
 import { HEADLINE, LEAD } from '../lib/brand.js';
+
+const CARDS = [
+  {
+    id: 'here', title: '여기',
+    links: [['여긴 어디?', '#/here'], ['우리 어디?', '#/meet']],
+    items: ['국가지점으로 현재 위치 알아보기', '두 사람(연인·친구 등)의 위치로 만남의 장소 추천(3곳)', '현재 위치(국가지점)로 긴급 문자나 전화로 신고하기'],
+  },
+  {
+    id: 'happy', title: '행복',
+    links: [['행복위치', '#/happy/pos'], ['행복메시지', '#/happy/message'], ['추천장소', '#/happy/place']],
+    items: ['생일·전화번호·MBTI로 의미 있는 위치 찾기', '타로·주역·점성술로 오늘의 조언 받기', '만남 장소(3곳) 추천'],
+  },
+  {
+    id: 'luck', title: '행운',
+    links: [['행운위치', '#/luck/pos'], ['행운번호', '#/luck/number'], ['행운장소', '#/luck/place']],
+    items: ['(선택) 국가지점으로 현재 위치 찾기', '(선택) 의미(생일·전화번호·MBTI)로 행운위치 찾기', '행운의 번호(6개) 추천', '행운의 장소(3곳, 1등 나온 판매점) 추천'],
+    note: '만 19세 이상',
+  },
+];
 
 export default function Home() {
   return (
     <div className="home">
       <h1>{HEADLINE}</h1>
       <p className="lead">{LEAD}</p>
-      <div className="feature-grid">
-        <a href="#/today" className="feature today-card">
-          <span className="feature-tag">오늘</span>
-          <strong>오늘의 행운 카드와 행운 장소</strong>
-          <span>타로나 주역으로 오늘의 카드를 뽑고, 고른 곳 주변의 볼 만한 곳 3곳을 추천해요.</span>
-          <span className="feature-go">오늘의 행운 보기 →</span>
-        </a>
-        <a href="#/week" className="feature week-card">
-          <span className="feature-tag">이번 주</span>
-          <strong>이번 주 행운번호와 행운 장소</strong>
-          <span>추첨기로 이번 주 행운번호를 뽑고, 고른 곳 주변의 1등 나온 판매점 3곳을 보여 드려요.</span>
-          <span className="feature-go">이번 주 행운 보기 →</span>
-        </a>
+      <div className="home-cards">
+        {CARDS.map((c) => (
+          <section key={c.id} className={`home-card ${c.id}`} aria-labelledby={`hc-${c.id}`}>
+            <h2 id={`hc-${c.id}`} className="home-pill">{c.title}</h2>
+            <nav className="home-links" aria-label={`${c.title} 바로가기`}>
+              {c.links.map(([label, href]) => <a key={href} href={href}>{label}</a>)}
+            </nav>
+            <ul className="home-items">
+              {c.items.map((t) => <li key={t} className={t.startsWith('(선택)') ? 'is-opt' : undefined}>{t}</li>)}
+            </ul>
+            {c.note && <p className="tiny muted">{c.note}</p>}
+          </section>
+        ))}
       </div>
-      <ol className="how">
-        <li>생년월일·전화번호·MBTI 중 하나를 넣어요 <span className="muted">(이 기기 안에서만 계산)</span></li>
-        <li>그 숫자가 국가지점번호로 들어 있는 전국 9~12곳 중 한 곳을 골라요</li>
-        <li>그곳을 중심으로 오늘·이번 주의 행운을 봐요</li>
-      </ol>
+      <p className="tiny muted home-privacy">🔒 생일·전화번호·MBTI와 위치는 이 기기 안에서만 계산하고 저장하거나 보내지 않아요.</p>
     </div>
   );
 }

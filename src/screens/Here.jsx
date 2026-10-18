@@ -18,7 +18,8 @@ export default function Here() {
   };
   return (
     <section className="result here">
-      <h1>내 위치 국가지점번호</h1>
+      <h1>여긴 어디?</h1>
+      <p className="sub-title">내 위치 국가지점번호</p>
       <p className="lead">지금 서 있는 가로세로 10m 칸의 번호를 휴대폰 위치로 계산해요. 위치는 이 화면에서만 쓰고 저장하거나 보내지 않아요.</p>
 
       <article className="card here-card">

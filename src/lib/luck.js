@@ -109,3 +109,7 @@ export const prefersReducedMotion = () =>
   typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
 export const loadHexagrams = () => getJson('data/hexagrams.json').then((h) => h.hexagrams);
+
+export const loadZodiac = () => getJson('data/zodiac.json').then((z) => z.signs);
+/** 시·군·구 대표 지점(상대 동네 고르기·판매점 거리). 실패하면 null */
+export const loadAnchors = () => getJson('data/sgg-anchors.json').then((a) => a.anchors).catch(() => null);

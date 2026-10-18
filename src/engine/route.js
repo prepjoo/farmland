@@ -32,3 +32,12 @@ export function fromMeText(km) {
   if (km < 100) return `내 위치에서 약 ${(Math.round(km * 10) / 10).toFixed(1)}km`;
   return `내 위치에서 약 ${Math.round(km)}km`;
 }
+
+/** 출발지와 도착지를 함께 넣은 카카오맵 길찾기. 형식 /link/from/이름,위도,경도/to/이름,위도,경도 — 공식 안내로 확인 필요 */
+export function kakaoFromToUrl(from, to) {
+  const f = kakaoRouteUrl(from);
+  const t = kakaoRouteUrl(to);
+  if (!f || !t) return null;
+  const part = (u) => u.replace('https://map.kakao.com/link/to/', '');
+  return `https://map.kakao.com/link/from/${part(f)}/to/${part(t)}`;
+}

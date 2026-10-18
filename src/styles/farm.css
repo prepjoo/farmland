@@ -163,3 +163,50 @@ body:has(.app.farm) { background: var(--bg, #fbf6ea); }
 .from-me-km { font-size: 14px; font-weight: 700; color: var(--green); }
 .route-link { display: inline-flex; align-items: center; min-height: 44px; padding: 0 2px; color: var(--accent-ink); font-weight: 800; font-size: 15px; }
 .route-link::after { content: ' ↗'; }
+
+/* 2026-10-19 메인: 여기 · 행복 · 행운 (사용자 시안) */
+.app.farm { --peach: #fbe6da; --sky: #e3f3fb; --pill: #1d5a7c; --chip: #e6e3df; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .app.farm { --peach: #2f2622; --sky: #1d2a30; --pill: #8cc4e3; --chip: #34372f; } }
+.home-cards { display: grid; gap: 16px; margin-top: 20px; }
+@media (min-width: 900px) { .home-cards { grid-template-columns: repeat(3, 1fr); } .app.farm main:has(.home) { max-width: 1100px; } }
+.home-card { background: var(--peach); border: 1px solid var(--line); border-radius: 22px; padding: 18px 18px 14px; }
+.app.farm .home-pill { display: inline-block; margin: 0 0 12px; padding: 4px 26px; border-radius: 999px; background: var(--pill); color: var(--bg); font-family: 'Nanum Myeongjo', var(--display); font-size: 22px; font-weight: 800; border: 2px solid var(--ink); }
+.home-links { display: flex; flex-wrap: wrap; gap: 8px; }
+.home-links a { display: inline-grid; place-items: center; min-height: 44px; padding: 0 14px; border-radius: 6px; background: var(--chip); color: var(--ink); font-weight: 800; text-decoration: none; }
+.home-links a:hover, .home-links a:focus-visible { outline: 2px solid var(--pill); }
+.home-items { list-style: none; padding: 0; margin: 14px 0 4px; display: grid; gap: 6px; font-size: 15px; }
+.home-items li::before { content: '★ '; }
+.home-items li.is-opt { color: #b3261e; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .home-items li.is-opt { color: #ffb4a8; } }
+.home-privacy { margin-top: 16px; }
+
+.sub-page .sub-panel { background: var(--sky); border: 1px solid var(--line); border-radius: 22px; padding: 16px; margin-top: 16px; scroll-margin-top: 12px; }
+.app.farm .sub-label { display: inline-block; margin: 0 0 8px; padding: 6px 16px; border-radius: 6px; background: var(--chip); color: var(--ink); font-size: 18px; }
+.sub-title { margin: -6px 0 8px; color: var(--muted); font-weight: 700; }
+.how-to { margin: 4px 0 10px; padding-left: 20px; color: var(--ink); }
+.wheel-row, .draw-row, .map-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; }
+.wheel-row .roulette { flex: 0 1 260px; }
+.wheel-row .cta, .draw-side .cta, .map-row .cta { width: auto; min-width: 140px; }
+.map-row .lucky-map { flex: 1 1 260px; }
+.roulette.dense .slice-label { font-size: 5px; }
+.zodiac-mark { font-size: 56px; line-height: 1; min-width: 72px; text-align: center; color: var(--navy); }
+.today-np .mission-note { margin-bottom: 0; }
+
+.ball-box { display: grid; grid-template-columns: repeat(9, 1fr); gap: 4px; padding: 10px; border-radius: 16px; background: var(--card); border: 2px solid var(--line); max-width: 300px; }
+.mini-ball { display: grid; place-items: center; aspect-ratio: 1; border-radius: 50%; font-size: 11px; font-weight: 800; color: #fff; }
+.mini-ball.b1 { background: #c9a24a; color: #1f2a24; } .mini-ball.b2 { background: #1f2f55; } .mini-ball.b3 { background: #b8532f; } .mini-ball.b4 { background: #6b7280; } .mini-ball.b5 { background: #3e6b48; }
+.draw-side { display: flex; flex-direction: column; gap: 4px; }
+.game-list { list-style: none; padding: 0; margin: 10px 0 0; display: grid; gap: 4px; }
+.game-list li { display: flex; align-items: center; gap: 8px; }
+.game-list li > button { min-width: 44px; min-height: 44px; border-radius: 22px; border: 1.5px solid var(--line); background: var(--card); color: var(--ink); font-weight: 800; cursor: pointer; }
+.game-list li > button.on { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.game-list .balls { margin: 0; }
+.start-box { margin: 6px 0 4px; padding: 10px 12px; border-radius: 12px; background: var(--card); border: 1px dashed var(--line); }
+.start-box p { margin: 4px 0; }
+
+.meet-who { display: grid; gap: 12px; margin-bottom: 8px; }
+@media (min-width: 640px) { .meet-who { grid-template-columns: 1fr 1fr; } }
+.meet-person { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 10px 12px; }
+.meet-label { margin: 0 0 6px; font-weight: 800; }
+.from-me-km.partner { color: var(--navy); }
+.luck-pin.person span { width: auto; min-width: 28px; height: 22px; padding: 0 4px; border-radius: 11px; background: #1f2f55; color: #fff; font-size: 11px; font-weight: 800; line-height: 16px; text-align: center; }

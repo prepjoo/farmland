@@ -11,9 +11,13 @@ async function audit(page) {
 }
 
 async function seeToday(page) {
-  await page.goto('/#/today');
-  await enterMeaning(page);
-  await chooseCandidate(page, 0);
+  // 행복메시지 [조언받기]까지 = 미션 ‘오늘의 행복메시지 보기’
+  await page.goto('/#/happy');
+  if (await page.locator('.chosen-bar').count() === 0) {
+    await enterMeaning(page);
+    await chooseCandidate(page, 0);
+  }
+  await page.getByRole('button', { name: '조언받기' }).click();
   await expect(page.locator('.fortune')).toBeVisible();
 }
 
@@ -28,7 +32,7 @@ test('처음엔 마을 그림 2종 중 고르기 → 첫 1팜, 가상 칸 안내
   await expect(page.getByRole('img', { name: '바닷가 마을 그림, 내 땅 1팜' })).toBeVisible();
   await expect(page.locator('.missions li')).toHaveCount(2);
   await expect(page.locator('.missions')).toContainText('0/5일');
-  await expect(page.getByRole('link', { name: '보러 가기' })).toHaveAttribute('href', '#/today');
+  await expect(page.getByRole('link', { name: '보러 가기' })).toHaveAttribute('href', '#/happy/message');
   expect(await audit(page)).toEqual([]);
   // 캐릭터·그림 바꾸기
   await page.getByRole('radio', { name: '병아리' }).click();
@@ -37,7 +41,7 @@ test('처음엔 마을 그림 2종 중 고르기 → 첫 1팜, 가상 칸 안내
   await expect(page.locator('.farm-count')).toContainText('1팜 · 들녘 마을');
 });
 
-test('오늘의 행운을 보면 하루 1팜, 같은 날 다시 보면 그대로', async ({ page }) => {
+test('오늘의 행복메시지를 받으면 하루 1팜, 같은 날 다시 받으면 그대로', async ({ page }) => {
   await prepare(page);
   await page.goto('/#/my');
   await page.getByRole('button', { name: /들녘 마을/ }).click();
@@ -68,15 +72,19 @@ test('이번 주 5일째에는 1팜을 더 받는다(일요일~토요일)', asyn
   await expect(page.locator('.missions li').nth(1)).toContainText('완료');
 });
 
-test('이번 주 번호·판매점을 봐도 팜은 늘지 않는다', async ({ page }) => {
+test('행운번호·행운장소를 봐도 팜은 늘지 않는다', async ({ page }) => {
   await prepare(page);
   await page.goto('/#/my');
   await page.getByRole('button', { name: /들녘 마을/ }).click();
-  await page.goto('/#/week');
+  await page.goto('/#/luck');
   await page.getByRole('button', { name: '네, 만 19세 이상이에요' }).click();
-  await enterMeaning(page);
+  await page.getByRole('radio', { name: '의미 있는 숫자로' }).click();
+  await enterMeaning(page, { button: '위치찾기' });
   await chooseCandidate(page, 0);
-  await expect(page.locator('.numbers .ball:not(.empty)')).toHaveCount(6);
+  await page.getByRole('button', { name: /^추첨/ }).click();
+  await expect(page.locator('.game-list > li')).toHaveCount(1);
+  await page.getByRole('button', { name: '행운장소', exact: true }).click();
+  await expect(page.locator('.near-list li')).toHaveCount(3);
   await page.goto('/#/my');
   await expect(page.locator('.farm-count')).toContainText('1팜');
   await expect(page.locator('.missions')).toContainText('0/5일');
@@ -88,9 +96,10 @@ test('이 기기 저장소에는 입력한 숫자·고른 곳이 남지 않는�
   await page.getByRole('button', { name: /들녘 마을/ }).click();
   await seeToday(page);
   const place = await page.locator('.chosen-bar strong').innerText();
-  await page.goto('/#/week');
+  await page.goto('/#/luck');
   await page.getByRole('button', { name: '네, 만 19세 이상이에요' }).click();
-  await expect(page.locator('.numbers .ball:not(.empty)')).toHaveCount(6);
+  await page.getByRole('button', { name: /^추첨/ }).click();
+  await expect(page.locator('.game-list > li')).toHaveCount(1);
   const all = await page.evaluate(() => Object.keys(localStorage).map((k) => `${k}=${localStorage.getItem(k)}`).join('\n'));
   expect(all).toContain('farmland:village');
   expect(all).not.toContain('57960488');

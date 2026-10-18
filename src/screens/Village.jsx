@@ -1,6 +1,6 @@
 // ‘내 귀땅 마을’(가상 마을) — 그림 마을 2종, 캐릭터 3가지, 미션 2가지(docs/plan.md, CLAUDE.md 10).
 // 1팜은 그림 속 가상 칸(100㎡ 상징)이며 실제 땅·소유가 아니다. 돈으로 사지 않고 현금 가치가 없다.
-// 미션은 ‘오늘’(누구나)에만 묶고, 번호 보기·복권 구매·판매점 방문에는 보상하지 않는다.
+// 미션은 ‘행복’(누구나)에만 묶고, 번호 보기·복권 구매·판매점 방문에는 보상하지 않는다.
 import { useMemo, useState } from 'react';
 import VillageArt, { Pin } from '../components/VillageArt.jsx';
 import { THEMES, PINS, chooseTheme, choosePin, doneToday, weekProgress, MAX_DRAWN } from '../engine/village.js';
@@ -25,7 +25,7 @@ export default function Village() {
   const notice = (
     <div className="soon-box village-note">
       <p className="tiny"><strong>1팜은 그림 속 가상 칸</strong>이에요. 100㎡(약 30평)를 상징할 뿐 실제 땅이나 소유와 관계없고, 돈으로 사거나 바꿀 수 없어요.</p>
-      <p className="tiny muted">팜은 ‘오늘의 행운 보기’와 ‘이번 주 5일 방문’으로만 늘어요. 번호 보기·복권 구매·판매점 방문에는 팜을 주지 않아요.</p>
+      <p className="tiny muted">팜은 ‘오늘의 행복메시지 보기’와 ‘이번 주 5일 방문’으로만 늘어요. 번호 보기·복권 구매·판매점 방문에는 팜을 주지 않아요.</p>
     </div>
   );
 
@@ -33,7 +33,7 @@ export default function Village() {
     return (
       <div className="village">
         <h1>내 귀땅 마을</h1>
-        <p className="lead">오늘의 행운을 보러 올 때마다 그림 속 내 마을 땅이 한 칸(1팜)씩 넓어져요. 먼저 마을 그림을 골라 주세요.</p>
+        <p className="lead">오늘의 행복메시지를 받으러 올 때마다 그림 속 내 마을 땅이 한 칸(1팜)씩 넓어져요. 먼저 마을 그림을 골라 주세요.</p>
         <div className="theme-pick" role="group" aria-label="마을 그림 고르기">
           {THEMES.map((t) => (
             <button key={t.id} type="button" className="theme-card" onClick={() => update(choosePin(chooseTheme(v, t.id), v.pin ?? 'sprout'))}>
@@ -63,15 +63,15 @@ export default function Village() {
         <ul className="missions">
           <li className={today ? 'done' : ''}>
             <div>
-              <strong>오늘의 행운 보기</strong> <span className="muted tiny">하루 1팜</span>
-              <p className="tiny">{today ? '오늘은 완료했어요. 내일 또 만나요.' : '오늘의 행운 카드를 보면 1팜이 늘어요.'}</p>
+              <strong>오늘의 행복메시지 보기</strong> <span className="muted tiny">하루 1팜</span>
+              <p className="tiny">{today ? '오늘은 완료했어요. 내일 또 만나요.' : '행복에서 [조언받기]로 오늘의 행복메시지를 받으면 1팜이 늘어요.'}</p>
             </div>
-            {today ? <span className="badge-done">완료</span> : <a className="mission-go" href="#/today">보러 가기</a>}
+            {today ? <span className="badge-done">완료</span> : <a className="mission-go" href="#/happy/message">보러 가기</a>}
           </li>
           <li className={week.rewarded ? 'done' : ''}>
             <div>
               <strong>이번 주 5일 방문</strong> <span className="muted tiny">주 1팜</span>
-              <p className="tiny">이번 주에 오늘의 행운을 본 날 <strong>{week.done}/{week.goal}일</strong>{week.rewarded ? ' — 이번 주 1팜을 받았어요.' : ''}</p>
+              <p className="tiny">이번 주에 행복메시지를 받은 날 <strong>{week.done}/{week.goal}일</strong>{week.rewarded ? ' — 이번 주 1팜을 받았어요.' : ''}</p>
               <span className="dots" aria-hidden="true">{Array.from({ length: week.goal }, (_, i) => <i key={i} className={i < week.done ? 'on' : ''} />)}</span>
               <p className="tiny muted">이번 주는 일요일에 새로 시작해요.</p>
             </div>

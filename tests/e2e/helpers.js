@@ -9,7 +9,7 @@ export async function prepare(page) {
 }
 
 /** 지금 화면의 입력 단계에서 방식을 고르고 값을 넣어 후보 목록까지 */
-export async function enterMeaning(page, { method = 'phone', value = '010-5796-0488' } = {}) {
+export async function enterMeaning(page, { method = 'phone', value = '010-5796-0488', button = '맞는 지역 보기' } = {}) {
   if (method === 'phone') {
     await page.getByRole('radio', { name: '전화번호' }).click();
     await page.getByLabel('전화번호').fill(value);
@@ -23,7 +23,7 @@ export async function enterMeaning(page, { method = 'phone', value = '010-5796-0
     await page.getByLabel('생년월일 월').selectOption(String(m));
     await page.getByLabel('생년월일 일').selectOption(String(d));
   }
-  await page.getByRole('button', { name: '맞는 지역 보기' }).click();
+  await page.getByRole('button', { name: button, exact: true }).click();
   await expect(page.locator('.cand-list button').first()).toBeVisible();
 }
 
@@ -33,20 +33,33 @@ export async function chooseCandidate(page, index = 0) {
   await expect(page.locator('.chosen-bar')).toBeVisible();
 }
 
-/** 이번 주: 19세 확인 → 입력 → 후보 고르기 → 번호 6개 */
-export async function openWeek(page, opts = {}) {
+/** 행운: 19세 확인 → 의미 있는 숫자로 → 후보 고르기 */
+export async function openLuck(page, opts = {}) {
   await prepare(page);
-  await page.goto('/#/week');
+  await page.goto('/#/luck');
   await page.getByRole('button', { name: '네, 만 19세 이상이에요' }).click();
-  await enterMeaning(page, opts);
+  await page.getByRole('radio', { name: '의미 있는 숫자로' }).click();
+  await enterMeaning(page, { ...opts, button: '위치찾기' });
   await chooseCandidate(page, opts.index ?? 0);
-  await expect(page.locator('.numbers .ball:not(.empty)')).toHaveCount(6);
 }
 
-/** 오늘: 입력 → 후보 고르기 */
-export async function openToday(page, opts = {}) {
+/** 행운번호 [추첨] 한 번 → 공 6개 */
+export async function drawOnce(page) {
+  await page.getByRole('button', { name: /^추첨/ }).click();
+  await expect(page.locator('.numbers .ball:not(.empty)').first()).toBeVisible();
+}
+
+/** 행복: 행복위치 고르기 */
+export async function openHappy(page, opts = {}) {
   await prepare(page);
-  await page.goto('/#/today');
+  await page.goto('/#/happy');
   await enterMeaning(page, opts);
   await chooseCandidate(page, opts.index ?? 0);
+}
+
+/** 행복메시지 [조언받기] → 메시지 */
+export async function getAdvice(page, kind = '타로') {
+  await page.getByRole('radio', { name: kind, exact: true }).click();
+  await page.getByRole('button', { name: '조언받기' }).click();
+  await expect(page.locator('.fortune')).toBeVisible();
 }
