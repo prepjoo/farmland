@@ -1,0 +1,36 @@
+name: 자동 점검
+
+# GitHub에 올릴 때마다 계산 테스트·빌드·화면 테스트를 자동으로 돌린다 (v4.1 명세 OPS-01).
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: 계산 테스트
+        run: npm test
+      - name: 빌드
+        run: npm run build
+      - name: 화면 테스트용 브라우저 설치
+        run: npx playwright install --with-deps chromium
+      - name: 화면·접근성 테스트 (휴대폰·PC)
+        run: npx playwright test
+      - name: 실패하면 기록 남기기
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-results
+          path: test-results/
+          retention-days: 7

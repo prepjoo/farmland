@@ -1,0 +1,69 @@
+{
+ "version": "tourapi-2026-10-12",
+ "sidos": {
+  "11": {
+   "places": 550,
+   "foods": 882
+  },
+  "12": {
+   "places": 714,
+   "foods": 396
+  },
+  "26": {
+   "places": 171,
+   "foods": 298
+  },
+  "27": {
+   "places": 233,
+   "foods": 169
+  },
+  "28": {
+   "places": 158,
+   "foods": 278
+  },
+  "30": {
+   "places": 96,
+   "foods": 79
+  },
+  "31": {
+   "places": 103,
+   "foods": 105
+  },
+  "36": {
+   "places": 23,
+   "foods": 52
+  },
+  "41": {
+   "places": 1041,
+   "foods": 2302
+  },
+  "43": {
+   "places": 542,
+   "foods": 245
+  },
+  "44": {
+   "places": 643,
+   "foods": 354
+  },
+  "47": {
+   "places": 789,
+   "foods": 364
+  },
+  "48": {
+   "places": 724,
+   "foods": 501
+  },
+  "50": {
+   "places": 295,
+   "foods": 393
+  },
+  "51": {
+   "places": 771,
+   "foods": 852
+  },
+  "52": {
+   "places": 639,
+   "foods": 250
+  }
+ }
+}

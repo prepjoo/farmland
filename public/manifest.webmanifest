@@ -1,0 +1,10 @@
+{
+  "name": "스타랜드(별땅) — 내 번호로 찾는 나의 별땅",
+  "short_name": "스타랜드",
+  "start_url": "/#/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffc145",
+  "lang": "ko",
+  "icons": [{ "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}
