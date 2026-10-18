@@ -8,7 +8,7 @@ import { todayTarot, todayHexagram } from '../engine/fortune.js';
 import { pickNearbyPlaces } from '../engine/nearby.js';
 import { kstDateString } from '../engine/kstDate.js';
 import { loadPlacesNear } from '../lib/data.js';
-import { kDate, loadTarot, loadHexagrams, prefersReducedMotion } from '../lib/luck.js';
+import { kDate, loadTarot, loadHexagrams, prefersReducedMotion, recordVisit } from '../lib/luck.js';
 
 function Hexagram({ lines, size = 64 }) {
   // lines: 아래(초효)부터 위로 1=양, 0=음
@@ -31,6 +31,7 @@ export default function TodayLuck({ chosen, setChosen }) {
   const [spun, setSpun] = useState(false);
   const [range, setRange] = useState(6);
   const [near, setNear] = useState(null);
+  const [mission, setMission] = useState(null); // 귀땅 마을 미션 결과(하루 1팜)
 
   useEffect(() => {
     Promise.all([loadTarot().catch(() => null), loadHexagrams().catch(() => null)]).then(([t, h]) => setDeck({ tarot: t, iching: h }));
@@ -54,6 +55,12 @@ export default function TodayLuck({ chosen, setChosen }) {
     return () => { alive = false; };
   }, [chosen, range, date]);
 
+  useEffect(() => {
+    // 오늘의 카드를 다 보여 준 뒤에만 ‘오늘의 행운 보기’ 미션을 기록한다(날짜만 저장)
+    if (!chosen || cardNo == null || !(kind === 'iching' || spun) || mission) return;
+    setMission(recordVisit(date));
+  }, [chosen, cardNo, kind, spun, mission, date]);
+
   if (!chosen) {
     return (
       <div className="luck-page">
@@ -64,6 +71,7 @@ export default function TodayLuck({ chosen, setChosen }) {
   }
 
   const card = kind === 'tarot' ? deck.tarot?.[cardNo] : deck.iching?.find((h) => h.n === cardNo);
+  const cardShown = Boolean(card && (kind === 'iching' || spun));
   return (
     <div className="luck-page">
       <h1>오늘의 행운 <span className="muted date">{kDate(date)}</span></h1>
@@ -90,6 +98,13 @@ export default function TodayLuck({ chosen, setChosen }) {
               <p className="tiny muted">{kind === 'tarot' ? '라이더-웨이트-스미스 정방향의 전통 의미를 요약했어요.' : '주역 괘사의 전통 의미를 쉬운 말로 옮겼어요.'} 고른 곳과 오늘 날짜로 정해져요.</p>
             </div>
           </div>
+        )}
+        {cardShown && mission && (
+          <p className="mission-note" role="status">
+            {mission.gained.includes('today') ? '오늘의 미션 완료! 귀땅 마을에 1팜이 늘었어요.' : '오늘의 미션은 이미 완료했어요.'}
+            {mission.gained.includes('week') && ' 이번 주 5일 방문도 채워 1팜을 더 받았어요.'}
+            {' '}<a href="#/my">내 귀땅 마을 보기</a>
+          </p>
         )}
       </section>
 

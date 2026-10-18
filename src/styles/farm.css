@@ -131,3 +131,25 @@ body:has(.app.farm) { background: var(--bg, #fbf6ea); }
 .luck-pin span { display: grid; place-items: center; color: #1f2a24; font-size: 12px; font-weight: 800; }
 .luck-pin.goal span { width: 24px; height: 24px; }
 .minor { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
+
+/* 내 귀땅 마을 (가상 마을, 그림 2종 · 미션 2가지) */
+.village-art { display: block; width: 100%; height: auto; border-radius: 14px; border: 1px solid var(--line); margin: 8px 0; }
+.village-art.small { border-radius: 10px; margin: 0 0 6px; }
+.theme-pick { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 16px; }
+.theme-card { display: flex; flex-direction: column; gap: 4px; text-align: left; padding: 10px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--card); color: var(--ink); font-size: 17px; cursor: pointer; }
+.theme-card:hover, .theme-card:focus-visible { border-color: var(--accent); }
+.farm-count { font-size: 18px; margin: 4px 0; }
+.farm-count strong { font-family: 'Nanum Myeongjo', var(--display); font-size: 28px; color: var(--green); }
+.missions { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.missions li { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+.missions li.done { border-color: var(--green); }
+.missions p { margin: 4px 0 0; }
+.mission-go { flex: none; display: inline-grid; place-items: center; min-height: 44px; padding: 0 14px; border-radius: 10px; background: var(--accent); color: var(--on-accent); font-weight: 800; text-decoration: none; }
+.badge-done { flex: none; padding: 4px 10px; border-radius: 999px; background: var(--green); color: var(--bg); font-size: 13px; font-weight: 800; }
+.dots { display: inline-flex; gap: 6px; margin-top: 6px; }
+.dots i { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--green); }
+.dots i.on { background: var(--green); }
+.chips.pins button { display: inline-flex; align-items: center; gap: 6px; }
+.village-note { margin-top: 20px; }
+.mission-note { margin-top: 12px; padding: 10px 14px; border-radius: 12px; background: var(--sand); font-size: 15px; }
+.mission-note a { color: var(--accent-ink); font-weight: 800; }

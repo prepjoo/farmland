@@ -23,7 +23,7 @@ export default function WeekLuck({ chosen, setChosen }) {
   const [data, setData] = useState(undefined);
   const [range, setRange] = useState(6);
   const [sharing, setSharing] = useState('');
-  const seenKey = `w${round}:${chosen?.text ?? ''}`;
+  const seenKey = `w${round}`; // 고른 국가지점번호는 저장하지 않으므로 회차만 남긴다
 
   useEffect(() => { loadPlaceData().then(setData); }, []);
   useEffect(() => {

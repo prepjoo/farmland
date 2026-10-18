@@ -96,3 +96,11 @@
 ### 5.4 화면 틀
 - 첫 화면: 큰 기능 카드 두 개(오늘 · 이번 주) + 사용 순서 3줄.
 - 머리: 로고 · [메뉴] 풀다운(처음 화면·오늘·이번 주·내 귀땅 마을·국가지점번호란?·내 위치 국가지점번호) · [긴급 신고](늘 보임). 아래 탭과 ‘나만의 행운’ 메뉴는 없앰.
+
+## 6. 내 귀땅 마을 (`engine/village.js`, `screens/Village.jsx`, `components/VillageArt.jsx`)
+- 상태 `{ v:1, theme:'field'|'sea'|null, pin:'sprout'|'chick'|'scarecrow'|null, farms, days:[YYYY-MM-DD 최근 14개], weeks:[회차] }`. 저장소에서 읽을 때 `normalizeVillage`로 고친다.
+- `chooseTheme`: 처음 고르면 farms = 1. 다시 바꿔도 팜은 그대로.
+- `recordTodayLuck(state, date)`: 그날 처음이면 +1(‘today’). 같은 회차 주(`roundForDate`, 일~토)의 날이 5일이 되고 그 회차를 아직 안 받았으면 +1(‘week’).
+- 호출 위치: ‘오늘’ 화면에서 오늘의 카드를 다 보여 준 뒤 한 번(`lib/luck.js` `recordVisit`). ‘이번 주’ 화면은 부르지 않는다.
+- `plotCells(n)`: 7×7 판 가운데 (3,3)에서 시작하는 시계 방향 나선, 최대 49칸.
+- 이 기기 저장소에는 날짜·회차·그림·캐릭터·팜 수만. 입력한 숫자·고른 곳·번호는 남기지 않는다(e2e로 확인). 추첨기 연출 기록 `seen`도 `w<회차>`만.
