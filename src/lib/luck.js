@@ -78,3 +78,5 @@ export function ballClass(n) {
 
 export const prefersReducedMotion = () =>
   typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+
+export const loadHexagrams = () => getJson('data/hexagrams.json').then((h) => h.hexagrams);

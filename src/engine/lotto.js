@@ -79,3 +79,8 @@ export function roundForDate(date) {
   const days = Math.round((t - FIRST_DRAW) / DAY);
   return Math.ceil(days / 7) + 1;
 }
+
+/** 이번 주 행운번호: 고른 지점의 국가지점번호 + 이번 주 회차 (2026-10-18 구조 변경, docs/spec.md 5장) */
+export function weeklyNumbers({ round, np }) {
+  return fiveGames(['fl-week-v1', String(round), String(np)]);
+}

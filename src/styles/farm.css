@@ -3,7 +3,7 @@
   --bg: #fbf6ea; --ink: #1f2a24; --muted: #5b5f57; --line: #e5dcc6; --card: #fffdf7; --paper: #fffdf7;
   --navy: #1f2f55; --gold: #c9a24a; --green: #3e6b48; --sand: #efe6cf;
   --accent: #1f2f55; --on-accent: #ffffff; --accent-ink: #1f2f55; --accent-soft: #efe6cf;
-  background: var(--bg); color: var(--ink); padding-bottom: 76px;
+  background: var(--bg); color: var(--ink);
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .app.farm {
@@ -83,18 +83,51 @@ body:has(.app.farm) { background: var(--bg, #fbf6ea); }
 /* 고르기 */
 .pick-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; }
 .pick-row label, .field-inline { display: flex; flex-direction: column; gap: 4px; font-weight: 700; font-size: 14px; }
-.app.farm select, .app.farm input[type="text"], .app.farm input:not([type]) { min-height: 48px; border-radius: 10px; border: 1.5px solid var(--line); background: var(--card); color: var(--ink); font-size: 16px; padding: 0 10px; }
+.app.farm select, .app.farm input[type="text"], .app.farm input[type="tel"], .app.farm input:not([type]) { min-height: 48px; border-radius: 10px; border: 1.5px solid var(--line); background: var(--card); color: var(--ink); font-size: 16px; padding: 0 10px; }
 .check { display: inline-flex; gap: 6px; align-items: center; min-height: 44px; }
 .pair-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .person { border: 1px solid var(--line); border-radius: 12px; padding: 8px 10px 10px; display: grid; gap: 6px; }
 .person legend { font-weight: 800; padding: 0 4px; }
 .my-luck section .cta { margin-top: 10px; }
 
-/* 아래 탭 */
-.tabbar { position: fixed; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: repeat(4, 1fr); background: var(--card); border-top: 1px solid var(--line); z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
-.tabbar a { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 2px 6px; min-height: 56px; text-decoration: none; color: var(--muted); font-size: 12px; font-weight: 700; }
-.tabbar svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linejoin: round; stroke-linecap: round; }
-.tabbar a[aria-current="page"] { color: var(--accent-ink); }
-.tabbar a[aria-current="page"] span { border-bottom: 2px solid currentColor; }
-@media (min-width: 900px) { .tabbar { max-width: 640px; margin: 0 auto; border: 1px solid var(--line); border-bottom: 0; border-radius: 14px 14px 0 0; } }
 @media (prefers-reduced-motion: reduce) { .ball.pop { animation: none; } }
+
+/* 2026-10-18 구조 변경: 첫 화면 큰 기능 두 개, 풀다운 메뉴, 입력 → 후보 */
+.home, .luck-page { max-width: 680px; margin: 0 auto; padding-bottom: 24px; }
+.feature-grid { display: grid; gap: 14px; margin-top: 20px; }
+@media (min-width: 640px) { .feature-grid { grid-template-columns: 1fr 1fr; } }
+.feature { display: flex; flex-direction: column; gap: 6px; padding: 20px; border-radius: 18px; text-decoration: none; color: #1f2a24; min-height: 200px; border: 1px solid rgba(0,0,0,.06); }
+.feature strong { font-family: 'Nanum Myeongjo', var(--display); font-weight: 800; font-size: 22px; line-height: 1.3; }
+.feature.today-card { background: linear-gradient(160deg, #fff4d6, #f4e3b0); }
+.feature.week-card { background: linear-gradient(160deg, #e3e9f7, #c9d4ee); }
+.feature-tag { align-self: flex-start; background: #1f2f55; color: #fff; border-radius: 999px; padding: 2px 12px; font-size: 13px; font-weight: 800; }
+.feature-go { margin-top: auto; font-weight: 800; color: #1f2f55; }
+.how { margin-top: 20px; padding-left: 20px; color: var(--ink); }
+.how li { margin: 4px 0; }
+.menu-wrap { position: relative; }
+.menu-btn { display: inline-flex; align-items: center; gap: 4px; min-height: 34px; padding: 0 12px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--card); color: var(--ink); font-size: 13px; font-weight: 800; cursor: pointer; }
+.menu-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
+.menu-panel { position: absolute; right: 0; top: calc(100% + 6px); z-index: 2000; background: var(--card); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,.14); min-width: 200px; padding: 6px; display: flex; flex-direction: column; }
+.menu-panel a { padding: 12px 14px; min-height: 44px; border-radius: 8px; color: var(--ink); text-decoration: none; font-weight: 700; }
+.menu-panel a:hover, .menu-panel a:focus-visible { background: var(--sand); }
+.menu-panel a[aria-current="page"] { color: var(--accent-ink); }
+.privacy { background: #e4f3ea; color: #1f4f33; border-radius: 12px; padding: 12px 14px; font-size: 15px; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .privacy { background: #17321f; color: #bfe8cf; } }
+.step-no { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: var(--on-accent); font-size: 14px; margin-right: 6px; vertical-align: 2px; }
+.picker .cta { margin-top: 14px; }
+.cand-list { list-style: none; padding: 0; display: grid; gap: 8px; }
+.cand-list button { width: 100%; text-align: left; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 6px; min-height: 52px; padding: 10px 14px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--card); color: var(--ink); font-size: 16px; cursor: pointer; }
+.cand-list button:hover, .cand-list button:focus-visible { border-color: var(--accent); }
+.chosen-bar { display: flex; justify-content: space-between; align-items: center; gap: 10px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 8px 14px; }
+.chosen-bar p { margin: 0; }
+.ghost.small { min-height: 40px; font-size: 14px; padding: 0 12px; white-space: nowrap; flex: none; }
+.near-list { padding-left: 22px; }
+.near-list li { margin: 6px 0; }
+.warn-soft { color: #8a5a00; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .warn-soft { color: #e0c278; } }
+.date { font-family: 'Gothic A1', sans-serif; font-size: 16px; font-weight: 600; }
+.hexagram rect { fill: #1f2f55; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .hexagram rect { fill: #aebde6; } }
+.luck-pin span { display: grid; place-items: center; color: #1f2a24; font-size: 12px; font-weight: 800; }
+.luck-pin.goal span { width: 24px; height: 24px; }
+.minor { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }

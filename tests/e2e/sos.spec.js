@@ -3,16 +3,16 @@ import AxeBuilder from '@axe-core/playwright';
 import { prepare } from './helpers.js';
 
 test.describe('긴급 신고', () => {
-  test('오른쪽 위 작은 [내 위치] → 지금 칸의 국가지점번호(계산값)와 오차, 누르기 전에는 위치를 묻지 않는다', async ({ page, context }) => {
+  test('메뉴의 [내 위치 국가지점번호] → 지금 칸의 국가지점번호(계산값)와 오차, 누르기 전에는 위치를 묻지 않는다', async ({ page, context }) => {
     await prepare(page);
     await page.addInitScript(() => { window.__asked = 0; const w = navigator.geolocation.watchPosition.bind(navigator.geolocation); navigator.geolocation.watchPosition = (...a) => { window.__asked++; return w(...a); }; });
     await context.grantPermissions(['geolocation']);
     await context.setGeolocation({ latitude: 37.5665, longitude: 126.978, accuracy: 9 });
     await page.goto('/#/');
-    await page.goto('/#/mine/1');
+    await page.goto('/#/today');
     expect(await page.evaluate(() => window.__asked)).toBe(0);
-    await expect(page.locator('header .top-quick a')).toHaveCount(2);
-    await page.locator('header .mini.here').click();
+    await page.getByRole('button', { name: '메뉴' }).click();
+    await page.getByRole('link', { name: '내 위치 국가지점번호' }).click();
     await expect(page.locator('section.here .land-stamp .np')).toHaveText('다사 5390 5203');
     await expect(page.locator('section.here')).toContainText('오차 약 9m');
     expect(await page.evaluate(() => window.__asked)).toBeGreaterThan(0);
@@ -69,7 +69,7 @@ test.describe('긴급 신고', () => {
     await context.grantPermissions(['geolocation']);
     await context.setGeolocation({ latitude: 37.5665, longitude: 126.978, accuracy: 20 });
     await prepare(page);
-    for (const path of ['/#/', '/#/place', '/#/me', '/#/my', '/#/learn', '/#/here']) {
+    for (const path of ['/#/', '/#/today', '/#/week', '/#/my', '/#/learn', '/#/here']) {
       await page.goto(path);
       await expect(page.locator('header .mini.sos')).toBeVisible();
     }

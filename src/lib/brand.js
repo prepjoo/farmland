@@ -1,7 +1,7 @@
 // 사이트 이름과 첫 화면 문구 (docs/plan.md). 바꿀 때는 여기만 고친다.
 export const SITE_NAME = '귀땅';
 export const HEADLINE = '오늘, 당신의 행운은?';
-export const LEAD = '오늘의 행운번호 6개와 행운 장소, 그리고 그렇게 나온 이유를 보여 드려요.';
+export const LEAD = '나에게 의미 있는 숫자로 고른 우리나라 한 곳에서, 오늘의 행운 카드와 이번 주 행운번호, 그리고 주변 행운 장소를 찾아 드려요.';
 export const CTA = '오늘의 행운번호 받기';
 export const ODDS = '모든 번호 조합의 1등 확률은 같습니다(8,145,060분의 1). 오락용이며 당첨과 관계없습니다.';
 export const NOT_OFFICIAL = '귀땅은 복권 운영사와 관계없는 개인 운영 사이트입니다. 번호를 팔거나 복권 구매를 대신하지 않습니다.';

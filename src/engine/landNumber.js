@@ -23,7 +23,18 @@ export function digitsFrom(kind, value) {
   const d = s.replace(/\D/g, '');
   if (kind === 'phone') return d.length >= 8 ? d.slice(-8) : null;
   if (kind === 'number') return d.length === 8 ? d : null;
+  if (kind === 'mbti') return mbtiAlphaDigits(s);
   return null;
+}
+
+/**
+ * 귀땅: MBTI 4글자 → 글자마다 알파벳 순서 2자리(A=01 … Z=26), 이어서 8자리 (사용자 결정 2026-10-18).
+ * 예: ESTJ → 05 19 20 10 → '05192010'. 틀리면 null
+ */
+export function mbtiAlphaDigits(m) {
+  const t = String(m ?? '').toUpperCase();
+  if (!/^[EI][SN][TF][JP]$/.test(t)) return null;
+  return [...t].map((c) => String(c.charCodeAt(0) - 64).padStart(2, '0')).join('');
 }
 
 /** 휴대폰 자판의 글자-숫자 (ABC 2, DEF 3, GHI 4, JKL 5, MNO 6, PQRS 7, TUV 8) */
