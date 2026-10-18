@@ -72,7 +72,7 @@ export async function pickLuckyPlace({ date, card, base, anchors, stores, meta }
     const list = byRegion.get(code);
     const store = list[Math.floor(rng() * list.length)];
     return {
-      mode: 'national', card, angle: null, dirName: null, sido, sidoCount: sidos.length,
+      mode: 'national', card, angle: null, dirName: null, sido, sidoCount: sidos.length, sidoCodes: sidos,
       region: { code, name: anchors[code].name }, distanceKm: null, rangeKm: null,
       store: storeOut(store), basis, fallback: false,
     };
@@ -100,7 +100,7 @@ export async function pickLuckyPlace({ date, card, base, anchors, stores, meta }
   const rng = await rngFor(date, chosen.code);
   const store = list[Math.floor(rng() * list.length)];
   return {
-    mode: 'base', card, angle, dirName: dirName(angle), sido: anchors[chosen.code].sido, sidoCount: null,
+    mode: 'base', card, angle, dirName: dirName(angle), sido: anchors[chosen.code].sido, sidoCount: null, sidoCodes: null,
     region: { code: chosen.code, name: anchors[chosen.code].name },
     distanceKm: round1(chosen.r), rangeKm, store: storeOut(store), basis, fallback,
   };

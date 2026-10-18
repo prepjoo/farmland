@@ -8,41 +8,20 @@ export async function prepare(page) {
   await page.clock.setFixedTime(FIXED_TIME);
 }
 
-export async function openHome(page) {
+/** 첫 화면을 열고 [오늘의 행운번호 받기] → 19세 확인(adult)까지. 결과 화면이 뜰 때까지 기다린다(동작 줄이기 상태에서). */
+export async function openToday(page, { adult = true } = {}) {
   await prepare(page);
   await page.goto('/#/');
-  await page.waitForSelector('.menu-grid');
+  await page.getByRole('button', { name: '오늘의 행운번호 받기' }).click();
+  await page.getByRole('button', { name: adult ? '네, 만 19세 이상이에요' : '아니요' }).click();
+  if (adult) await expect(page.locator('.numbers .ball:not(.empty)')).toHaveCount(6);
 }
 
-/** 년·월·일 고르기 ('1962-03-07') */
-export async function pickDate(page, date) {
-  const [y, m, d] = date.split('-').map(Number);
-  await page.getByLabel('날짜 연대').selectOption(String(Math.floor(y / 10) * 10));
-  await page.getByLabel('날짜 년').selectOption(String(y));
-  await page.getByLabel('날짜 월').selectOption(String(m));
-  await page.getByLabel('날짜 일').selectOption(String(d));
-}
-
-/** 1단계에서 날짜를 넣고 후보 화면까지. couple: [MBTI, MBTI]면 MBTI 별땅(날짜 없음), flow: 'mine'(기본)·'us' */
-export async function findByDate(page, date, { couple, flow = 'mine' } = {}) {
-  await prepare(page);
-  const f = couple ? 'mbti' : flow;
-  await page.goto(`/#/${f}/1`);
-  await page.reload(); // 앞 화면에서 고른 내용이 남지 않게 새로 연다
-  if (couple) {
-    await page.locator('.mbti-box select').nth(0).selectOption(couple[0]);
-    await page.locator('.mbti-box select').nth(1).selectOption(couple[1]);
-  }
-  if (!couple) await pickDate(page, date);
-  await page.getByRole('button', { name: couple ? '추천 별 받기' : '후보 별 보기' }).click();
-  await page.waitForSelector('.cand-list');
-}
-
-/** 후보 n번째(0부터)를 골라 내 별땅 화면까지 */
-export async function chooseCandidate(page, n, reason = '') {
-  await page.locator('.cand-list button').nth(n).click();
-  if (reason) await page.getByLabel(/고른 이유/).fill(reason);
-  await page.locator('.submit-bar .primary').click();
-  await page.waitForSelector('.land-hero');
-  await expect(page.locator('.land-card').first()).toBeVisible();
+/** 행운 장소 화면에서 시·도/시·군·구를 고르고 찾기 */
+export async function findPlace(page, sidoLabel, sggLabel) {
+  await page.goto('/#/place');
+  await page.getByLabel('시·도').selectOption({ label: sidoLabel });
+  await page.getByLabel('시·군·구').selectOption({ label: sggLabel });
+  await page.getByRole('button', { name: '오늘의 행운 장소 찾기' }).click();
+  await expect(page.locator('.place-info')).toBeVisible();
 }

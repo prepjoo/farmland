@@ -10,6 +10,7 @@ import '@fontsource/nanum-myeongjo/400.css'; // 별땅문서 이미지용 (SIL O
 import '@fontsource/nanum-myeongjo/700.css';
 import '@fontsource/nanum-myeongjo/800.css';
 import './styles/base.css';
+import './styles/farm.css';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

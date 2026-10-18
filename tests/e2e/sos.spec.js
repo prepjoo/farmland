@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
-import { openHome, findByDate, chooseCandidate, prepare } from './helpers.js';
+import { prepare } from './helpers.js';
 
 test.describe('긴급 신고', () => {
   test('오른쪽 위 작은 [내 위치] → 지금 칸의 국가지점번호(계산값)와 오차, 누르기 전에는 위치를 묻지 않는다', async ({ page, context }) => {
@@ -18,9 +18,9 @@ test.describe('긴급 신고', () => {
     expect(await page.evaluate(() => window.__asked)).toBeGreaterThan(0);
   });
 
-  test('오른쪽 위 긴급 신고 → 전화 버튼이 바로 보인다 (메인 메뉴에서는 내림, v5)', async ({ page }) => {
-    await openHome(page);
-    await expect(page.locator('.menu-grid .menu-tile.sos')).toHaveCount(0);
+  test('오른쪽 위 긴급 신고 → 전화 버튼이 바로 보인다', async ({ page }) => {
+    await prepare(page);
+    await page.goto('/#/');
     await page.locator('header .mini.sos').click();
     await expect(page.locator('.sos h1')).toHaveText('긴급 신고');
     await expect(page.locator('a[href="tel:119"]')).toBeVisible();
@@ -64,19 +64,12 @@ test.describe('긴급 신고', () => {
     await expect(page.locator('a[href="tel:119"]')).toBeVisible();
   });
 
-  test('별땅 화면의 번호는 보여 주기만(신고 창·전화 링크 없음)', async ({ page }) => {
-    await findByDate(page, '1962-03-07');
-    await chooseCandidate(page, 0);
-    await page.locator('.land-stamp').click();
-    await expect(page.getByRole('dialog')).toHaveCount(0);
-    await expect(page.locator('main a[href^="sms:"], main a[href^="tel:"]')).toHaveCount(0);
-  });
 
   test('모든 화면 오른쪽 위에 작은 [긴급 신고] → 누르면 바로 내 위치를 찾아 전화·문자', async ({ page, context }) => {
     await context.grantPermissions(['geolocation']);
     await context.setGeolocation({ latitude: 37.5665, longitude: 126.978, accuracy: 20 });
     await prepare(page);
-    for (const path of ['/#/', '/#/mine/1', '/#/learn', '/#/archive', '/#/here']) {
+    for (const path of ['/#/', '/#/place', '/#/me', '/#/my', '/#/learn', '/#/here']) {
       await page.goto(path);
       await expect(page.locator('header .mini.sos')).toBeVisible();
     }

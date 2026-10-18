@@ -1,0 +1,100 @@
+/* 귀땅 화면 (v4 오늘의 행운). 색: 한지·먹·들녘 초록·보리 금·증서 남 (기획안 v3 7장, v4 2장) */
+.app.farm {
+  --bg: #fbf6ea; --ink: #1f2a24; --muted: #5b5f57; --line: #e5dcc6; --card: #fffdf7; --paper: #fffdf7;
+  --navy: #1f2f55; --gold: #c9a24a; --green: #3e6b48; --sand: #efe6cf;
+  --accent: #1f2f55; --on-accent: #ffffff; --accent-ink: #1f2f55; --accent-soft: #efe6cf;
+  background: var(--bg); color: var(--ink); padding-bottom: 76px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .app.farm {
+    --bg: #171a17; --ink: #f1ede2; --muted: #b9b4a6; --line: #34372f; --card: #20231f; --paper: #20231f;
+    --navy: #aebde6; --gold: #e0c278; --green: #93c49d; --sand: #2b2d27;
+    --accent: #e0c278; --on-accent: #1f1a0b; --accent-ink: #e0c278; --accent-soft: #2b2d27;
+  }
+}
+body:has(.app.farm) { background: var(--bg, #fbf6ea); }
+.app.farm .top { grid-template-areas: "logo . quick"; }
+.app.farm .logo { font-family: 'Nanum Myeongjo', var(--display); font-weight: 800; color: var(--navy); }
+.app.farm h1 { font-family: 'Nanum Myeongjo', var(--display); font-weight: 800; color: var(--ink); }
+.app.farm h2 { font-size: 20px; margin: 24px 0 8px; }
+.muted { color: var(--muted); }
+.tiny { font-size: 13px; line-height: 1.6; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+.cta { min-height: 52px; padding: 0 22px; border: 0; border-radius: 12px; background: var(--navy); color: #fff; font-size: 17px; font-weight: 800; cursor: pointer; width: 100%; max-width: 420px; }
+.app.farm .cta { background: var(--accent); color: var(--on-accent); }
+.cta:disabled { opacity: .45; cursor: default; }
+.ghost { min-height: 48px; padding: 0 18px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--card); color: var(--ink); font-size: 16px; cursor: pointer; }
+.link-btn { background: none; border: 0; color: var(--accent-ink); text-decoration: underline; font-size: 14px; cursor: pointer; padding: 8px 0; min-height: 44px; }
+.odds { font-size: 13px; color: var(--muted); border-top: 1px dashed var(--line); padding-top: 12px; margin-top: 24px; }
+
+.today, .place-finder, .my-luck, .village { max-width: 640px; margin: 0 auto; padding-bottom: 24px; }
+.age-box, .minor, .soon-box { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; margin-top: 16px; }
+.age-box .row .cta { width: auto; }
+
+/* 공 */
+.balls { list-style: none; display: flex; gap: 8px; padding: 10px 12px; margin: 8px 0; background: var(--sand); border-radius: 40px; justify-content: space-between; max-width: 420px; }
+.ball { width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: 18px; color: #fff; border: 2px solid #fff; font-variant-numeric: tabular-nums; }
+.balls.small .ball { width: 36px; height: 36px; font-size: 15px; }
+.ball.b1 { background: #c9a24a; color: #1f2a24; } .ball.b2 { background: #1f2f55; } .ball.b3 { background: #b8532f; } .ball.b4 { background: #6b7280; } .ball.b5 { background: #3e6b48; }
+.ball.empty { background: transparent; border: 2px dashed var(--line); }
+.ball.pop { animation: pop .35s ease-out; }
+@keyframes pop { from { transform: scale(.3) translateY(-24px); opacity: 0; } to { transform: none; opacity: 1; } }
+.machine { display: flex; flex-direction: column; align-items: flex-start; }
+.drum-wrap { position: relative; width: 220px; margin: 4px auto 0 0; }
+.drum { width: 220px; height: 220px; display: block; }
+.chute { width: 10px; height: 18px; background: #cbbf9f; margin: 0 auto; border-radius: 0 0 4px 4px; }
+.games { display: flex; gap: 8px; margin: 6px 0; }
+.games button { min-width: 44px; min-height: 44px; border-radius: 22px; border: 1.5px solid var(--line); background: var(--card); color: var(--ink); font-weight: 800; cursor: pointer; }
+.games button.on { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+
+/* 룰렛 */
+.roulette { margin: 8px 0; max-width: 280px; }
+.roulette svg { width: 100%; height: auto; display: block; }
+.slice { fill: #fbf6ea; stroke: #cbbf9f; stroke-width: 1; }
+.slice.alt { fill: #efe6cf; }
+.slice.on { fill: #c9a24a; }
+.slice-label { font-size: 9px; font-weight: 800; fill: #1f2a24; }
+.hub { fill: #1f2f55; }
+.pointer { fill: #1f2f55; }
+
+/* 장소 */
+.place-card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 4px 16px 12px; margin-top: 16px; }
+.place-name { font-size: 18px; margin: 4px 0; }
+.place-facts { margin: 0 0 8px; }
+.lucky-map { height: 200px; border-radius: 10px; overflow: hidden; border: 1px solid var(--line); }
+.luck-pin span { display: block; width: 22px; height: 22px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.35); }
+.luck-pin.base span { background: #1f2f55; width: 14px; height: 14px; margin: 4px; }
+.luck-pin.goal span { background: #c9a24a; }
+
+/* 긁는 카드·이유 */
+.scratch { position: relative; border-radius: 14px; overflow: hidden; border: 1px solid var(--line); background: var(--card); min-height: 160px; }
+.scratch-body { padding: 12px 16px; }
+.scratch:not(.open) .scratch-body { max-height: 260px; overflow: hidden; }
+.scratch-foil { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: grab; }
+.scratch-now { position: absolute; right: 10px; bottom: 10px; min-height: 40px; padding: 0 14px; border-radius: 20px; border: 0; background: #1f2f55; color: #fff; font-weight: 700; cursor: pointer; }
+.reason-card { display: flex; gap: 12px; align-items: flex-start; }
+.card-name { font-weight: 800; font-size: 18px; margin: 0; }
+.reasons h3 { font-size: 16px; margin: 14px 0 4px; }
+.reason-list { padding-left: 20px; margin: 0; }
+.reason-list li { margin: 4px 0; }
+.share-row { margin-top: 16px; }
+
+/* 고르기 */
+.pick-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; }
+.pick-row label, .field-inline { display: flex; flex-direction: column; gap: 4px; font-weight: 700; font-size: 14px; }
+.app.farm select, .app.farm input[type="text"], .app.farm input:not([type]) { min-height: 48px; border-radius: 10px; border: 1.5px solid var(--line); background: var(--card); color: var(--ink); font-size: 16px; padding: 0 10px; }
+.check { display: inline-flex; gap: 6px; align-items: center; min-height: 44px; }
+.pair-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.person { border: 1px solid var(--line); border-radius: 12px; padding: 8px 10px 10px; display: grid; gap: 6px; }
+.person legend { font-weight: 800; padding: 0 4px; }
+.my-luck section .cta { margin-top: 10px; }
+
+/* 아래 탭 */
+.tabbar { position: fixed; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: repeat(4, 1fr); background: var(--card); border-top: 1px solid var(--line); z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
+.tabbar a { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 2px 6px; min-height: 56px; text-decoration: none; color: var(--muted); font-size: 12px; font-weight: 700; }
+.tabbar svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linejoin: round; stroke-linecap: round; }
+.tabbar a[aria-current="page"] { color: var(--accent-ink); }
+.tabbar a[aria-current="page"] span { border-bottom: 2px solid currentColor; }
+@media (min-width: 900px) { .tabbar { max-width: 640px; margin: 0 auto; border: 1px solid var(--line); border-bottom: 0; border-radius: 14px 14px 0 0; } }
+@media (prefers-reduced-motion: reduce) { .ball.pop { animation: none; } }

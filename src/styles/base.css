@@ -614,9 +614,6 @@ select:focus, input:focus, button:focus-visible { outline: 2px solid var(--accen
 .daily-face .luck-line { margin: 6px 0 0; }
 .lucky-numbers { margin-top: 14px; }
 .lucky-numbers ul { list-style: none; display: flex; gap: 10px; padding: 0; margin: 8px 0 0; }
-.ball { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; font: 400 24px/1 'Do Hyeon', sans-serif; color: #222034; background: radial-gradient(circle at 35% 30%, #fff6d8, #ffc145 70%); border: 2px solid #222034; box-shadow: 0 2px 0 #222034; }
-.ball:nth-child(2) { background: radial-gradient(circle at 35% 30%, #ffeef2, #ff8fa8 70%); }
-.ball:nth-child(3) { background: radial-gradient(circle at 35% 30%, #e6fbf7, #5ed3c3 70%); }
 
 /* 첫 화면 별땅문서 예시 (2026-10-14) */
 .hero-deed { flex: none; margin: 4px 0 0; width: 112px; text-align: center; }

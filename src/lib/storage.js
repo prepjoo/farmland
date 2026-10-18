@@ -1,5 +1,5 @@
 // 이 기기 브라우저 저장소. 막혀 있거나 실패하면 조용히 넘어간다(사생활 모드 등).
-const PREFIX = 'starland:';
+const PREFIX = 'farmland:';
 
 export function load(key, fallback = null) {
   try {
