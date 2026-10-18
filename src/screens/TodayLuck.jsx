@@ -4,6 +4,9 @@ import MeaningPicker, { ChosenBar, DistanceChips, RANGE_LABELS } from '../compon
 import Roulette from '../components/Roulette.jsx';
 import TarotArt from '../components/TarotArt.jsx';
 import LuckyMap from '../components/LuckyMap.jsx';
+import { MyLocationBar, FromMe, RouteLink, ROUTE_NOTE } from '../components/RouteTools.jsx';
+import { kakaoRouteUrl, withDistanceFromMe } from '../engine/route.js';
+import { useMyPosition } from '../lib/useMyPosition.js';
 import { todayTarot, todayHexagram } from '../engine/fortune.js';
 import { pickNearbyPlaces } from '../engine/nearby.js';
 import { kstDateString } from '../engine/kstDate.js';
@@ -31,7 +34,8 @@ export default function TodayLuck({ chosen, setChosen }) {
   const [spun, setSpun] = useState(false);
   const [range, setRange] = useState(6);
   const [near, setNear] = useState(null);
-  const [mission, setMission] = useState(null); // 귀땅 마을 미션 결과(하루 1팜)
+  const [mission, setMission] = useState(null);
+  const pos = useMyPosition(); // [내 위치에서 거리 보기]를 눌렀을 때만 // 귀땅 마을 미션 결과(하루 1팜)
 
   useEffect(() => {
     Promise.all([loadTarot().catch(() => null), loadHexagrams().catch(() => null)]).then(([t, h]) => setDeck({ tarot: t, iching: h }));
@@ -116,13 +120,18 @@ export default function TodayLuck({ chosen, setChosen }) {
         {near && near.items.length > 0 && (
           <>
             {near.widened && <p className="tiny warn-soft">{RANGE_LABELS[range]} 안에는 3곳이 없어 {near.rangeKm}km까지 넓혀 찾았어요.</p>}
+            <MyLocationBar pos={pos} />
             <ol className="near-list">
-              {near.items.map((p) => (
-                <li key={p.id}><strong>{p.name}</strong> <span className="muted">· {p.theme} · 약 {p.distanceKm}km</span></li>
+              {withDistanceFromMe(pos.me, near.items, (p) => p).map((p) => (
+                <li key={p.id}>
+                  <div><strong>{p.name}</strong> <span className="muted">· {p.theme} · 고른 곳에서 약 {p.distanceKm}km</span></div>
+                  <div className="route-row"><FromMe km={p.fromMeKm} /><RouteLink href={kakaoRouteUrl(p)} name={p.name} /></div>
+                </li>
               ))}
             </ol>
             <LuckyMap base={chosen} items={near.items} label={`${chosen.place}에서 추천 장소 ${near.items.length}곳`} />
             <p className="tiny muted">한국관광공사 TourAPI의 공개 장소예요. 광고가 아니고, 운영 여부는 방문 전 확인하세요. 거리는 직선거리예요.</p>
+            <p className="tiny muted">{ROUTE_NOTE}</p>
           </>
         )}
       </section>

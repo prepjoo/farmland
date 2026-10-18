@@ -104,3 +104,9 @@
 - 호출 위치: ‘오늘’ 화면에서 오늘의 카드를 다 보여 준 뒤 한 번(`lib/luck.js` `recordVisit`). ‘이번 주’ 화면은 부르지 않는다.
 - `plotCells(n)`: 7×7 판 가운데 (3,3)에서 시작하는 시계 방향 나선, 최대 49칸.
 - 이 기기 저장소에는 날짜·회차·그림·캐릭터·팜 수만. 입력한 숫자·고른 곳·번호는 남기지 않는다(e2e로 확인). 추첨기 연출 기록 `seen`도 `w<회차>`만.
+
+## 7. 행운 장소로 가는 길 (`engine/route.js`, `components/RouteTools.jsx`, `lib/useMyPosition.js`)
+- `kakaoRouteUrl({name, lat, lon})` → `https://map.kakao.com/link/to/<이름(쉼표→빈칸)>,<위도 6자리>,<경도 6자리>`. 위치가 없으면 null.
+- `kakaoSearchUrl(q)` → `https://map.kakao.com/link/search/<q>` (판매점: ‘상호 시·군·구’).
+- `withDistanceFromMe(me, items, pointOf)` → 각 항목에 `fromMeKm`(직선, 소수 1자리). `fromMeText(km)`로 문장.
+- 위치: [내 위치에서 거리 보기]를 누를 때만 `getCurrentPosition` 한 번. 화면 메모리에만 두고 저장·전송하지 않는다. 링크는 `target=_blank rel="noopener noreferrer"`.

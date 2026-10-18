@@ -153,3 +153,13 @@ body:has(.app.farm) { background: var(--bg, #fbf6ea); }
 .village-note { margin-top: 20px; }
 .mission-note { margin-top: 12px; padding: 10px 14px; border-radius: 12px; background: var(--sand); font-size: 15px; }
 .mission-note a { color: var(--accent-ink); font-weight: 800; }
+
+/* 행운 장소로 가는 길: 내 위치에서 거리 · 길찾기(카카오맵) */
+.from-me { margin: 8px 0; }
+.from-me p { margin: 4px 0; }
+.ghost.small { min-height: 44px; font-size: 15px; }
+.near-list li { margin: 10px 0; }
+.route-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin-top: 2px; }
+.from-me-km { font-size: 14px; font-weight: 700; color: var(--green); }
+.route-link { display: inline-flex; align-items: center; min-height: 44px; padding: 0 2px; color: var(--accent-ink); font-weight: 800; font-size: 15px; }
+.route-link::after { content: ' ↗'; }

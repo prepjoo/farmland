@@ -4,6 +4,9 @@ import { useEffect, useMemo, useState } from 'react';
 import MeaningPicker, { ChosenBar, DistanceChips, RANGE_LABELS } from '../components/MeaningPicker.jsx';
 import BallMachine from '../components/BallMachine.jsx';
 import ScratchCard from '../components/ScratchCard.jsx';
+import { MyLocationBar, FromMe, RouteLink, ROUTE_NOTE } from '../components/RouteTools.jsx';
+import { kakaoSearchUrl, withDistanceFromMe } from '../engine/route.js';
+import { useMyPosition } from '../lib/useMyPosition.js';
 import LuckyMap from '../components/LuckyMap.jsx';
 import { weeklyNumbers, roundForDate, drawDateOfRound, GAMES } from '../engine/lotto.js';
 import { nearestStores } from '../engine/nearby.js';
@@ -23,6 +26,7 @@ export default function WeekLuck({ chosen, setChosen }) {
   const [data, setData] = useState(undefined);
   const [range, setRange] = useState(6);
   const [sharing, setSharing] = useState('');
+  const pos = useMyPosition(); // [내 위치에서 거리 보기]를 눌렀을 때만
   const seenKey = `w${round}`; // 고른 국가지점번호는 저장하지 않으므로 회차만 남긴다
 
   useEffect(() => { loadPlaceData().then(setData); }, []);
@@ -131,13 +135,18 @@ export default function WeekLuck({ chosen, setChosen }) {
             {stores && stores.items.length > 0 && (
               <>
                 {stores.widened && <p className="tiny warn-soft">{RANGE_LABELS[range]} 안에는 3곳이 없어 더 넓혀 찾았어요.</p>}
+                <MyLocationBar pos={pos} />
                 <ol className="near-list">
-                  {stores.items.map((m) => (
-                    <li key={m.store.id}><strong>{m.store.name}</strong> <span className="muted">· {m.region.sidoName} {m.region.name} · 약 {m.distanceKm}km · 최근 1년 자동 1등 {m.store.wins}회</span></li>
+                  {withDistanceFromMe(pos.me, stores.items, (m) => m.region).map((m) => (
+                    <li key={m.store.id}>
+                      <div><strong>{m.store.name}</strong> <span className="muted">· {m.region.sidoName} {m.region.name} · 고른 곳에서 약 {m.distanceKm}km · 최근 1년 자동 1등 {m.store.wins}회</span></div>
+                      <div className="route-row"><FromMe km={m.fromMeKm} /><RouteLink search href={kakaoSearchUrl(`${m.store.name} ${m.region.name}`)} name={m.store.name} /></div>
+                    </li>
                   ))}
                 </ol>
                 <LuckyMap base={chosen} items={stores.items.map((m) => m.region)} label={`${chosen.place} 주변 1등 판매점이 있는 시·군·구`} />
                 <p className="tiny muted">핀과 거리는 그 시·군·구의 대표 지점 기준이에요(자료에 가게 주소가 없음). 정확한 위치는 복권 공식 판매점 검색에서 확인하세요. {PLACE_NOTE}</p>
+                <p className="tiny muted">판매점은 가게 주소가 자료에 없어, 카카오맵에서 ‘상호 + 시·군·구’로 찾아요. 같은 이름의 다른 가게가 나올 수 있어요. {ROUTE_NOTE}</p>
               </>
             )}
           </section>
