@@ -205,11 +205,14 @@ export default function Luck({ chosen, setChosen, section }) {
         {!point && <p className="tiny muted">먼저 위에서 행운지점을 정해 주세요.</p>}
         {point && (
           <>
+            <p className="tiny muted">거리를 고르면 지도가 그 범위에 맞춰 바뀌어요. 지도의 ＋·－ 단추로 확대·축소할 수 있어요.</p>
+            <DistanceChips value={range} onChange={setRange} />
             <div className="map-row">
-              <LuckyMap base={point} items={stores ? stores.items.map((m) => m.region) : []} label={stores ? `${point.place} 주변 1등 판매점이 있는 시·군·구` : `행운위치 ${point.place}`} />
+              <LuckyMap base={point} baseTitle={`행운위치: ${point.place}`} rangeKm={stores ? Math.max(range, stores.rangeKm) : range}
+                items={stores ? stores.items.map((m) => ({ ...m.region, name: `${m.store.name} (${m.region.name} 대표 지점)` })) : []}
+                label={stores ? `${point.place} 주변 1등 판매점이 있는 시·군·구` : `행운위치 ${point.place}와 ${range}km 범위`} />
               <button type="button" className="cta" disabled={showStores || data === undefined} onClick={() => setShowStores(true)}>행운장소</button>
             </div>
-            {showStores && <DistanceChips value={range} onChange={setRange} />}
             {data === null && <p>자료 준비 중이에요.</p>}
             {stores && stores.items.length > 0 && (
               <>

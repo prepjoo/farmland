@@ -1,144 +1,222 @@
-// 두 사람 만남 장소 3곳 (‘우리 어디?’ · 행복 ‘추천장소’에서 같이 쓴다, docs/spec.md 8장)
-// 나 = [내 위치 찾기]를 눌렀을 때의 현재 위치(화면 메모리에만), 상대 = 시·도 → 시·군·구를 고르면 그 대표 지점.
-// 장소는 한국관광공사 TourAPI 공개 장소·음식점·카페. 길찾기는 카카오맵에 목적지만 넘긴다.
-import { useEffect, useMemo, useState } from 'react';
+// 두 사람 만남 별자리 (행복 ‘추천장소’, 2026-10-19 사용자 요청: 별땅 방식으로)
+// 1) 나 = 현재 위치 또는 고른 동네, 상대 = 시·도→시·군·구→읍·면·동(선택)의 대표 지점 (같은 동네면 나 둘레에서)
+// 2) 두 출발점을 변·대각선으로 하는 정오각형 4개 중 오늘 카드 방향에 가장 가까운 별 → 빈 꼭짓점 3개 가까이의 공개 장소(TourAPI) = 만남 장소 1·2·3
+// 3) 장소를 고르면 두 사람의 거리, 길찾기, 상대에게 보내기, 근처 맛집·카페. 위치·동네는 화면 메모리에만.
+import { useEffect, useState } from 'react';
 import LuckyMap from './LuckyMap.jsx';
+import RegionPicker from './RegionPicker.jsx';
+import NationalPointBadge from './NationalPointBadge.jsx';
+import { DistanceChips } from './MeaningPicker.jsx';
 import { RouteLink } from './RouteTools.jsx';
-import { meetPlaces, midpoint } from '../engine/meet.js';
-import { kakaoRouteUrl } from '../engine/route.js';
-import { loadAnchors } from '../lib/luck.js';
-import { loadPlacesNear, loadFoodsNear } from '../lib/data.js';
+import { kakaoRouteUrl, kakaoFromToUrl } from '../engine/route.js';
+import { nearbyFood } from '../engine/food.js';
+import { distanceM } from '../engine/geo.js';
+import { bearingWord, cardBearing } from '../engine/landCard.js';
+import { buildMeet, anchorOfRegion, pointFromLatLon } from '../lib/runMeet.js';
+import { loadFoodsNear } from '../lib/data.js';
 import { useMyPosition } from '../lib/useMyPosition.js';
 
-const KINDS = [
-  { id: 'place', label: '관광지' },
-  { id: 'food', label: '맛집' },
-  { id: 'cafe', label: '카페' },
-];
-const kmText = (km) => (km < 1 ? `${Math.max(100, Math.round(km * 10) * 100)}m` : `${km.toFixed(1)}km`);
+const EMPTY = { sido: '', sgg: '', dong: '', label: '' };
+const kmText = (m) => (m < 1000 ? `${Math.max(100, Math.round(m / 100) * 100)}m` : `${(m / 1000).toFixed(1)}km`);
 
-export default function MeetPlaces({ idPrefix = 'meet' }) {
+/** 실제 위치 관계를 줄여 그린 별(A·B·1·2·3, 별땅과 같이 1→3→5→2→4 잇기) */
+function StarFigure({ m }) {
+  const pts = m.starPts;
+  const xs = pts.map((p) => p.x), ys = pts.map((p) => p.y);
+  const [x0, x1, y0, y1] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
+  const sc = 200 / Math.max(x1 - x0, y1 - y0, 1);
+  const P = (p) => ({ X: 40 + (p.x - x0) * sc + (200 - (x1 - x0) * sc) / 2, Y: 40 + (y1 - p.y) * sc + (200 - (y1 - y0) * sc) / 2 });
+  const byId = Object.fromEntries(pts.map((p) => [p.id, p]));
+  const d = m.starIds.map((id, k) => { const q = P(byId[id]); return `${k ? 'L' : 'M'}${q.X.toFixed(1)} ${q.Y.toFixed(1)}`; }).join(' ');
+  return (
+    <svg viewBox="0 0 280 280" className="meet-star" role="img" aria-label={`만남 별자리: ${pts.map((p) => p.id).join(', ')}를 별 모양으로 이은 그림`}>
+      <path d={d} className="ms-line" />
+      {pts.map((p) => {
+        const q = P(p);
+        const home = p.id === 'A' || p.id === 'B';
+        return (
+          <g key={p.id}>
+            <circle cx={q.X} cy={q.Y} r="13" className={home ? 'ms-home' : 'ms-spot'} />
+            <text x={q.X} y={q.Y + 5} textAnchor="middle" className={home ? 'ms-t home' : 'ms-t'}>{p.id}</text>
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
+function Foods({ place }) {
+  const [state, setState] = useState(null);
+  useEffect(() => {
+    let alive = true;
+    loadFoodsNear(place, 12)
+      .then((foods) => {
+        let list = [], r = 0;
+        for (r of [1500, 5000, 10000]) {
+          list = nearbyFood({ foods, lat: place.lat, lon: place.lon, count: 2, maxDistanceM: r });
+          if (list.length) break;
+        }
+        if (alive) setState({ list });
+      })
+      .catch(() => alive && setState({ list: [] }));
+    return () => { alive = false; };
+  }, [place.id, place.lat, place.lon]);
+  if (!state) return <p className="tiny muted">근처 맛집을 찾는 중…</p>;
+  if (!state.list.length) return <p className="tiny muted">10km 안에 등록된 음식점·카페가 없어요.</p>;
+  return (
+    <ul className="fl-food-list">
+      {state.list.map((f) => (
+        <li key={f.id}>
+          <span><b>{f.name}</b>{f.cafe ? ' · 카페' : ''} <small className="muted">{place.name}에서 {kmText(f.distanceM)}</small></span>
+          <RouteLink href={kakaoRouteUrl(f)} name={f.name} />
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/** cardNo: 오늘 카드 번호(0~21, 별의 방향), cardName: 화면에 쓸 이름, cardWhy: 그 카드의 출처 설명 */
+export default function MeetPlaces({ cardNo, cardName, cardWhy }) {
   const pos = useMyPosition();
-  const [anchors, setAnchors] = useState(undefined);
-  const [sido, setSido] = useState('');
-  const [sgg, setSgg] = useState('');
-  const [kind, setKind] = useState('place');
-  const [result, setResult] = useState(null);
-  const [busy, setBusy] = useState(false);
-  const [shared, setShared] = useState('');
+  const [meMode, setMeMode] = useState('here');
+  const [meRegion, setMeRegion] = useState(EMPTY);
+  const [you, setYou] = useState(EMPTY);
+  const [same, setSame] = useState(false);
+  const [range, setRange] = useState(6);
+  const [state, setState] = useState({ status: 'idle' });
+  const [picked, setPicked] = useState(null);
+  const [sent, setSent] = useState('');
+  const bearing = cardBearing(cardNo);
 
-  useEffect(() => { loadAnchors().then(setAnchors); }, []);
-  const sidos = useMemo(() => {
-    if (!anchors) return [];
-    const m = new Map();
-    Object.values(anchors).forEach((a) => m.set(a.sido, a.sidoName));
-    return [...m.entries()].sort((x, y) => x[0].localeCompare(y[0]));
-  }, [anchors]);
-  const sggs = useMemo(() => (anchors && sido ? Object.entries(anchors).filter(([, a]) => a.sido === sido).sort((x, y) => x[1].name.localeCompare(y[1].name, 'ko')) : []), [anchors, sido]);
-  const partner = sgg && anchors ? { ...anchors[sgg], code: sgg } : null;
-  const me = pos.me;
+  const meReady = meMode === 'here' ? pos.status === 'found' : Boolean(meRegion.sgg);
+  const ready = meReady && (same || you.sgg);
+  useEffect(() => { setState({ status: 'idle' }); setPicked(null); }, [meMode, pos.me, meRegion.sgg, meRegion.dong, you.sgg, you.dong, same, range, cardNo]);
 
-  useEffect(() => { setResult(null); }, [me, sgg, kind]);
-
-  async function find() {
-    if (!me || !partner) return;
-    setBusy(true);
+  async function go() {
+    setState({ status: 'busy' });
     try {
-      const mid = midpoint(me, partner);
-      const gap = meetPlaces({ a: me, b: partner, places: [] }).gapKm;
-      const radius = Math.min(80, Math.max(10, gap / 2 + 10));
-      let pool;
-      if (kind === 'place') pool = await loadPlacesNear([mid], radius);
-      else pool = (await loadFoodsNear(mid, radius)).filter((f) => (kind === 'cafe' ? f.cafe : !f.cafe));
-      setResult(meetPlaces({ a: me, b: partner, places: pool }));
+      const A = meMode === 'here' ? pointFromLatLon(pos.me) : await anchorOfRegion(meRegion);
+      const B = same ? A : await anchorOfRegion(you);
+      const m = await buildMeet({ A, B, bearing, rangeM: range * 1000 });
+      setState({ status: m.spots.length ? 'ok' : 'none', m });
     } catch {
-      setResult({ items: [], error: true });
-    } finally {
-      setBusy(false);
+      setState({ status: 'error' });
     }
   }
 
-  async function sendTo(p) {
-    const text = `귀땅 만남 장소: ${p.name}\n카카오맵 길찾기: ${kakaoRouteUrl(p)}`;
+  async function sendTo(p, m) {
+    const fromB = !m.same && kakaoFromToUrl({ name: '상대 출발', lat: m.B.lat, lon: m.B.lon }, p);
+    const text = `귀땅 만남 장소: ${p.name}\n카카오맵 길찾기: ${fromB || kakaoRouteUrl(p)}`;
     try {
-      if (navigator.share) { await navigator.share({ title: '우리 만남 장소', text }); setShared(p.id); return; }
-      await navigator.clipboard.writeText(text);
-      setShared(p.id);
+      if (navigator.share) await navigator.share({ title: '우리 만남 장소', text });
+      else await navigator.clipboard.writeText(text);
+      setSent(p.id);
     } catch (e) {
-      if (e?.name !== 'AbortError') setShared('');
+      if (e?.name !== 'AbortError') setSent('');
     }
   }
 
+  const m = state.m;
+  const meTitle = meMode === 'here' ? 'A 나: 지금 있는 곳' : `A 나: ${meRegion.label} 대표 지점`;
+  const youTitle = `B 상대: ${you.label} 대표 지점`;
   return (
     <div className="meet">
+      <p>두 사람이 출발하는 곳을 정하면, 오늘의 카드 <b>‘{cardName}’</b>의 방향인 <b>{bearingWord(bearing)}쪽</b>으로 별을 그려 별 꼭짓점 가까이의 만남 장소 3곳을 골라 드려요. <span className="tiny muted">{cardWhy}</span></p>
       <ol className="how-to tiny">
-        <li>내 위치를 찾고, 상대가 있는 동네를 골라요.</li>
-        <li>관광지·맛집·카페 중 하나를 고르면 두 사람 사이의 만남 장소 3곳이 나와요.</li>
-        <li>장소마다 두 사람의 거리를 보고, 길찾기를 할 수 있어요.</li>
+        <li>나는 지금 있는 곳 또는 동네를, 상대는 동네(읍·면·동까지 고르면 더 정확)를 정해요.</li>
+        <li>만날 장소까지 거리를 고르고 [만남 별자리 그리기]를 누르면 별과 장소 3곳이 나와요.</li>
+        <li>장소를 고르면 두 사람의 거리와 길찾기, 근처 맛집을 볼 수 있어요.</li>
       </ol>
 
       <div className="meet-who">
         <div className="meet-person">
-          <p className="meet-label">나</p>
-          {pos.status !== 'found' && (
-            <button type="button" className="ghost small" onClick={pos.locate} disabled={pos.status === 'finding'}>
-              {pos.status === 'finding' ? '위치 찾는 중…' : '내 위치 찾기'}
-            </button>
-          )}
-          {pos.status === 'found' && <p className="tiny">현재 위치를 찾았어요{pos.me.accuracy > 100 ? ` (오차 약 ${Math.round(pos.me.accuracy)}m)` : ''}. <button type="button" className="link-btn" onClick={pos.forget}>지우기</button></p>}
-          {pos.status === 'error' && <p className="tiny warn-soft" role="alert">{pos.message}</p>}
-          {pos.status === 'idle' && <p className="tiny muted">누를 때만 위치를 찾아요. 이 화면에서 거리 계산에만 쓰고 저장하거나 보내지 않아요.</p>}
-        </div>
-        <div className="meet-person">
-          <p className="meet-label" id={`${idPrefix}-partner`}>상대</p>
-          {anchors === null && <p className="tiny">동네 자료를 불러오지 못했어요.</p>}
-          <div className="row" role="group" aria-labelledby={`${idPrefix}-partner`}>
-            <select aria-label="상대 시·도" value={sido} onChange={(e) => { setSido(e.target.value); setSgg(''); }} disabled={!anchors}>
-              <option value="">시·도</option>
-              {sidos.map(([c, n]) => <option key={c} value={c}>{n}</option>)}
-            </select>
-            <select aria-label="상대 시·군·구" value={sgg} onChange={(e) => setSgg(e.target.value)} disabled={!sido}>
-              <option value="">시·군·구</option>
-              {sggs.map(([c, a]) => <option key={c} value={c}>{a.name}</option>)}
-            </select>
+          <p className="meet-label">A 나</p>
+          <div className="chips small" role="radiogroup" aria-label="내 출발 지점">
+            {[['here', '지금 있는 곳'], ['region', '동네 고르기']].map(([k, l]) => (
+              <button key={k} type="button" role="radio" aria-checked={meMode === k} className={meMode === k ? 'on' : ''} onClick={() => setMeMode(k)}>{l}</button>
+            ))}
           </div>
-          <p className="tiny muted">상대는 그 시·군·구의 대표 지점에서 출발한다고 보고 계산해요. 고른 동네는 저장하지 않아요.</p>
-        </div>
-      </div>
-
-      <div className="chips small" role="radiogroup" aria-label="장소 종류">
-        {KINDS.map((k) => (
-          <button key={k.id} type="button" role="radio" aria-checked={kind === k.id} className={kind === k.id ? 'on' : ''} onClick={() => setKind(k.id)}>{k.label}</button>
-        ))}
-      </div>
-      <button type="button" className="cta" disabled={!me || !partner || busy} onClick={find}>{busy ? '찾는 중…' : '만남 장소 찾기'}</button>
-      {(!me || !partner) && <p className="tiny muted">내 위치와 상대 동네를 모두 정하면 누를 수 있어요.</p>}
-
-      {result && (
-        <div className="meet-result" aria-live="polite">
-          {result.items.length === 0 && <p>{result.error ? '장소 자료를 불러오지 못했어요.' : '두 사람 사이에서 추천할 장소 자료를 찾지 못했어요.'}</p>}
-          {result.items.length > 0 && (
+          {meMode === 'here' && (
             <>
-              <p className="tiny">두 사람 사이 직선거리 약 {kmText(result.gapKm)}. 두 사람이 비슷하게 갈 수 있는 곳부터 골랐어요.</p>
-              <ol className="near-list">
-                {result.items.map((p) => (
-                  <li key={p.id}>
-                    <div><strong>{p.name}</strong>{p.theme && <span className="muted"> · {p.theme}</span>}</div>
-                    <div className="route-row">
-                      <span className="from-me-km">나에게서 약 {kmText(p.fromA)}</span>
-                      <span className="from-me-km partner">상대에게서 약 {kmText(p.fromB)}</span>
-                    </div>
-                    <div className="route-row">
-                      <RouteLink href={kakaoRouteUrl(p)} name={p.name} />
-                      <button type="button" className="link-btn" onClick={() => sendTo(p)}>{shared === p.id ? '보낼 준비 완료' : '상대에게 보내기'}</button>
-                    </div>
-                  </li>
-                ))}
-              </ol>
-              <LuckyMap items={result.items} people={[{ ...me, label: '나' }, { ...partner, label: '상대' }]} label={`나, 상대(${partner.sidoName} ${partner.name}), 만남 장소 ${result.items.length}곳`} />
-              <p className="tiny muted">한국관광공사 TourAPI의 공개 장소·음식점·카페예요. 광고가 아니고, 영업 여부는 방문 전 확인하세요. 거리는 직선거리예요. 길찾기·보내기에는 장소 이름과 위치만 들어가고 두 사람의 위치는 넣지 않아요.</p>
+              {pos.status !== 'found' && (
+                <button type="button" className="ghost small" onClick={pos.locate} disabled={pos.status === 'finding'}>
+                  {pos.status === 'finding' ? '위치 찾는 중…' : '내 위치 찾기'}
+                </button>
+              )}
+              {pos.status === 'found' && <p className="tiny">현재 위치를 찾았어요{pos.me.accuracy > 100 ? ` (오차 약 ${Math.round(pos.me.accuracy)}m라 넓어요. 동네 고르기가 더 정확할 수 있어요)` : ''}. <button type="button" className="link-btn" onClick={pos.forget}>지우기</button></p>}
+              {pos.status === 'error' && <p className="tiny warn-soft" role="alert">{pos.message} 동네 고르기로 정할 수도 있어요.</p>}
+              {pos.status === 'idle' && <p className="tiny muted">누를 때만 위치를 찾아요. 이 화면에서만 쓰고 저장하거나 보내지 않아요.</p>}
             </>
           )}
+          {meMode === 'region' && <RegionPicker who="나" value={meRegion} onChange={setMeRegion} />}
+        </div>
+        <div className="meet-person">
+          <p className="meet-label">B 상대</p>
+          <label className="toggle tiny">
+            <input type="checkbox" checked={same} onChange={(e) => setSame(e.target.checked)} />
+            <span>같은 동네에 있어요(또는 상대 동네를 몰라요) — 내 둘레에서 세 곳을 찾아요</span>
+          </label>
+          {!same && <RegionPicker who="상대" value={you} onChange={setYou} />}
+          <p className="tiny muted">상대는 고른 동네의 대표 지점에서 출발한다고 보고 계산해요. 고른 동네는 저장하지 않아요.</p>
+        </div>
+      </div>
+
+      <p className="tiny muted" id="meet-range">만날 장소까지 거리 (출발 지점에서 잰 직선거리)</p>
+      <DistanceChips value={range} onChange={setRange} />
+      <button type="button" className="cta" disabled={!ready || state.status === 'busy'} onClick={go}>{state.status === 'busy' ? '별자리를 그리는 중…' : '만남 별자리 그리기'}</button>
+      {!ready && <p className="tiny muted">나와 상대의 출발 지점을 정하면 누를 수 있어요.</p>}
+
+      {state.status === 'error' && <p className="warn" role="alert">별자리를 그리지 못했어요. 잠시 뒤 다시 눌러 주세요.</p>}
+      {state.status === 'none' && <p className="warn" role="status">별 꼭짓점 근처에 등록된 공개 장소가 없어요. 거리를 바꾸거나 다른 동네로 해 보세요.</p>}
+      {state.status === 'ok' && (
+        <div className="meet-result" aria-live="polite">
+          <StarFigure m={m} />
+          <ol className="fl-meet-list">
+            <li className="is-start"><b className="no start">A</b> {meTitle.replace('A ', '')}</li>
+            {!m.same && <li className="is-start"><b className="no start">B</b> {youTitle.replace('B ', '')}</li>}
+            {m.spots.map((s) => {
+              const p = s.place;
+              const dA = distanceM(m.A.lat, m.A.lon, p.lat, p.lon);
+              const dB = distanceM(m.B.lat, m.B.lon, p.lat, p.lon);
+              const open = picked === p.id;
+              return (
+                <li key={s.n} className={open ? 'open' : ''}>
+                  <b className="no">{s.n}</b>
+                  <div>
+                    <span className="muted tiny">{p.theme}</span>
+                    <strong>{p.name}</strong> {p.np && <NationalPointBadge np={{ text: p.np }} />}
+                    <div className="route-row">
+                      <span className="from-me-km">나에게서 약 {kmText(dA)}</span>
+                      {!m.same && <span className="from-me-km partner">상대에게서 약 {kmText(dB)}</span>}
+                    </div>
+                    <button type="button" className="ghost small" aria-expanded={open} onClick={() => setPicked(open ? null : p.id)}>{open ? '접기' : '이 장소 고르기'}</button>
+                    {open && (
+                      <div className="start-box">
+                        <div className="route-row">
+                          <RouteLink href={meMode === 'region' ? kakaoFromToUrl({ name: '내 출발', lat: m.A.lat, lon: m.A.lon }, p) : kakaoRouteUrl(p)} name={`나: ${p.name}`} />
+                          <span className="tiny muted">나 → {p.name}</span>
+                        </div>
+                        {!m.same && (
+                          <div className="route-row">
+                            <RouteLink href={kakaoFromToUrl({ name: '상대 출발', lat: m.B.lat, lon: m.B.lon }, p)} name={`상대: ${p.name}`} />
+                            <span className="tiny muted">상대 동네({you.label}) → {p.name}</span>
+                          </div>
+                        )}
+                        <button type="button" className="link-btn" onClick={() => sendTo(p, m)}>{sent === p.id ? '보낼 준비 완료' : '상대에게 보내기'}</button>
+                        <p className="food-title tiny"><b>근처 맛집·카페</b></p>
+                        <Foods place={p} />
+                      </div>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
+          <LuckyMap items={m.spots.map((s) => s.place)} star={m.starLine}
+            people={[{ lat: m.A.lat, lon: m.A.lon, label: 'A', title: meTitle }, ...(m.same ? [] : [{ lat: m.B.lat, lon: m.B.lon, label: 'B', title: youTitle }])]}
+            label="만남 별자리: 두 사람 출발 지점(A·B)과 만남 장소 1·2·3, 별 모양 선. 같은 내용이 위 목록에 있어요." />
+          {(m.outOfRange || m.dKm > 60) && <p className="tiny warn-soft">두 출발 지점이 {Math.round(m.dKm)}km 떨어져 있어{m.outOfRange ? ' 고른 거리보다 먼 곳도 있어요.' : ' 만남 장소도 멀 수 있어요.'}</p>}
+          <p className="tiny muted">별 그림과 지도의 선은 상징이고 실제 길이 아니에요. 장소는 한국관광공사 TourAPI의 공개 장소이고, 음식점은 광고가 아니에요. 운영·영업 여부는 가기 전에 확인하세요. 길찾기를 누르면 장소 위치와 출발 지점(동네를 골랐다면 그 대표 지점) 좌표가 카카오맵으로 가요. 내 현재 위치는 넣지 않아요.</p>
         </div>
       )}
     </div>

@@ -92,3 +92,48 @@ describe('출발 길찾기 (행운위치 → 목적지)', () => {
     expect(kakaoFromToUrl({ name: 'a' }, { name: 'b', lat: 1, lon: 1 })).toBeNull();
   });
 });
+
+describe('행복메시지 자세한 풀이(오늘의 운세처럼)', () => {
+  const d = JSON.parse(readFileSync(new URL('../../public/data/fortune-detail.json', import.meta.url), 'utf8'));
+  it('타로 22 · 주역 64 · 점성술 12 모두 사람·관계 / 일·공부·돈 / 마음·건강 / 오늘의 실천', () => {
+    expect(d.tarot.map((x) => x.n)).toEqual([...Array(22).keys()]);
+    expect(d.iching.map((x) => x.n)).toEqual(Array.from({ length: 64 }, (_, i) => i + 1));
+    expect(d.zodiac.map((x) => x.n)).toEqual([...Array(12).keys()]);
+    for (const x of [...d.tarot, ...d.iching, ...d.zodiac]) {
+      for (const k of ['love', 'work', 'mind', 'action']) expect(x[k]?.length, `${x.n} ${k}`).toBeGreaterThan(8);
+    }
+    expect(d.status).toContain('예보가 아님');
+  });
+  it('금지 표현이 없다', () => {
+    const text = JSON.stringify(d);
+    for (const w of ['예측', '적중', '보장', '대박', '로또', '당첨']) expect(text).not.toContain(w);
+  });
+});
+
+describe('오늘의 행운 방향', () => {
+  it('타로는 카드 번호 × 360/22°(0번 정북, 시계 방향)를 8방위로, 주역은 상괘의 후천팔괘 방위', async () => {
+    const { luckyDirection } = await import('../../src/engine/fortune.js');
+    expect(luckyDirection('tarot', { n: 0 })).toBe('북');
+    expect(luckyDirection('tarot', { n: 11 })).toBe('남');
+    expect(luckyDirection('tarot', { n: 6 })).toBe('동');
+    expect(luckyDirection('iching', { upper: '감' })).toBe('북');
+    expect(luckyDirection('iching', { upper: '리' })).toBe('남');
+    expect(luckyDirection('iching', { upper: '건' })).toBe('북서');
+    expect(luckyDirection('zodiac', { n: 0 })).toBeNull();
+  });
+});
+
+describe('만남 별자리 그리는 순서 (별땅과 같이 둘레 1→3→5→2→4→1)', () => {
+  it('정오각형 꼭짓점 5개는 별 모양 순서로 잇는다', async () => {
+    const { starOrder } = await import('../../src/engine/starPath.js');
+    const c = { x: 0, y: 0 };
+    const at = (deg, id) => ({ id, x: Math.sin((deg * Math.PI) / 180) * 100, y: Math.cos((deg * Math.PI) / 180) * 100 });
+    const pts = [at(0, 'A'), at(72, 'B'), at(144, '1'), at(216, '2'), at(288, '3')];
+    expect(starOrder({ center: c, points: pts })).toEqual(['2', 'A', '1', '3', 'B', '2']);
+  });
+  it('5개가 아니면 둘레를 따라 한 바퀴', async () => {
+    const { starOrder } = await import('../../src/engine/starPath.js');
+    const pts = [{ id: 'A', x: 0, y: 10 }, { id: '1', x: 10, y: 0 }, { id: '2', x: 0, y: -10 }];
+    expect(starOrder({ center: { x: 0, y: 0 }, points: pts })).toEqual(['A', '1', '2', 'A']);
+  });
+});

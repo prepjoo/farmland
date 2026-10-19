@@ -5,7 +5,6 @@ import { useHashRoute } from './lib/useHashRoute.js';
 import Home from './screens/Home.jsx';
 import Happy from './screens/Happy.jsx';
 import Luck from './screens/Luck.jsx';
-import Meet from './screens/Meet.jsx';
 import Village from './screens/Village.jsx';
 import Learn from './screens/Learn.jsx';
 import Placeholder from './screens/Placeholder.jsx';
@@ -17,7 +16,6 @@ import { clearAll } from './lib/luck.js';
 const MENU = [
   { href: '#/', label: '처음 화면' },
   { href: '#/here', label: '여긴 어디?' },
-  { href: '#/meet', label: '우리 어디?' },
   { href: '#/happy', label: '행복' },
   { href: '#/luck', label: '행운' },
   { href: '#/my', label: '내 귀땅 마을' },
@@ -61,7 +59,7 @@ export default function App() {
   if (route === '/' || route === '') screen = <Home />;
   else if (top === 'happy' || top === 'today') screen = <Happy chosen={chosen} setChosen={setChosen} section={sub} />;
   else if (top === 'luck' || top === 'week') screen = <Luck chosen={chosen} setChosen={setChosen} section={sub} />;
-  else if (route === '/meet') screen = <Meet />;
+  else if (route === '/meet') screen = <Happy chosen={chosen} setChosen={setChosen} section="place" />; // 옛 ‘우리 어디?’ 주소
   else if (route === '/my') screen = <Village />;
   else if (route === '/learn') screen = <Learn />;
   else if (route === '/sos') screen = <Sos />;

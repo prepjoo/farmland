@@ -120,3 +120,9 @@
 - 행운지점: ‘국가지점으로 현재 위치’(getCurrentPosition 한 번 → `toNationalPoint` → `lookupOne`) 또는 `MeaningPicker`(버튼 ‘위치찾기’). 행운위치는 화면 메모리에만.
 - 행운번호: `weeklyNumbers({round, np})` 5게임을 [추첨]마다 하나씩 보여 준다. 저장 없음(다시 오면 0게임부터, 번호는 같음).
 - 행운장소: [행운장소] → `nearestStores`. [출발] → `kakaoFromToUrl(행운위치, 구 대표 지점)` (형식 확인 필요) + `kakaoSearchUrl(상호 시·군·구)`.
+
+## 9. 만남 별자리 · 오늘의 운세 · 지도 (2026-10-19 일곱 번째, 8장의 만남 장소·여기 카드보다 우선)
+- 여기 카드: 여긴 어디?(#/here, 들어가면 위치를 바로 찾음) · 긴급 신고. #/meet은 행복 추천장소로 보낸다.
+- 행복메시지 풀이: `fortune-detail.json` {tarot[22], iching[64], zodiac[12]} 각 {n, love, work, mind, action}. 화면은 오늘의 흐름(tradition + luck) · 사람·관계 · 일·공부·돈 · 마음·건강 · 오늘의 작은 실천 · 행운의 방향(`fortune.luckyDirection`).
+- 만남 별자리: `lib/runMeet.js` `buildMeet({A, B, bearing, rangeM})` → `engine/meetStar.js`(별땅과 같음) + `engine/starPath.js` `starOrder`(5점이면 0→2→4→1→3→0). A = 현재 위치(`pointFromLatLon`) 또는 `anchorOfRegion`, B = `anchorOfRegion({sido, sgg, dong})`(동을 고르면 `regions/dong-<시도>.json`의 그 동 대표 지점). bearing = `cardBearing(오늘 카드)`. 부품 `components/MeetPlaces.jsx`, `components/RegionPicker.jsx`.
+- 지도 `components/LuckyMap.jsx`: zoomControl, Tooltip, `star` 선, `rangeKm` 원(바뀌면 fitBounds 다시).

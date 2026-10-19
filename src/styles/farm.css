@@ -210,3 +210,33 @@ body:has(.app.farm) { background: var(--bg, #fbf6ea); }
 .meet-label { margin: 0 0 6px; font-weight: 800; }
 .from-me-km.partner { color: var(--navy); }
 .luck-pin.person span { width: auto; min-width: 28px; height: 22px; padding: 0 4px; border-radius: 11px; background: #1f2f55; color: #fff; font-size: 11px; font-weight: 800; line-height: 16px; text-align: center; }
+
+/* 행복위치 설명 · 오늘의 운세처럼 자세한 행복메시지 */
+.why-box { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 10px 14px; margin-bottom: 10px; }
+.why-box summary { font-weight: 800; cursor: pointer; min-height: 32px; }
+.why-box ul { margin: 6px 0; padding-left: 18px; display: grid; gap: 6px; font-size: 15px; }
+.reading { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; margin-top: 12px; }
+.reading-head { display: flex; gap: 12px; align-items: center; }
+.app.farm .reading-title { margin: 12px 0 4px; font-size: 18px; }
+.reading-one { font-family: 'Nanum Myeongjo', var(--display); font-size: 20px; font-weight: 800; color: var(--green); margin: 4px 0 10px; }
+.reading-list { margin: 0; display: grid; gap: 8px; }
+.reading-list > div { display: grid; grid-template-columns: 6.5em 1fr; gap: 8px; padding: 8px 0; border-top: 1px dashed var(--line); }
+.reading-list dt { font-weight: 800; color: var(--navy); }
+.reading-list dd { margin: 0; line-height: 1.6; }
+.reading-list .do dd { font-weight: 700; }
+@media (max-width: 420px) { .reading-list > div { grid-template-columns: 1fr; gap: 2px; } }
+
+/* 만남 별자리 */
+.region-pick { display: grid; gap: 6px; }
+.region-pick select { width: 100%; }
+.toggle { display: flex; gap: 8px; align-items: flex-start; margin: 4px 0 8px; }
+.toggle input { width: 22px; height: 22px; flex: none; margin-top: 1px; }
+.fl-meet-list { list-style: none; padding: 0; margin: 10px 0; display: grid; gap: 8px; }
+.fl-meet-list > li { display: flex; gap: 10px; align-items: flex-start; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
+.fl-meet-list > li.is-start { background: transparent; border-style: dashed; }
+.fl-meet-list > li > div { flex: 1; display: grid; gap: 4px; justify-items: start; }
+.fl-meet-list .no { flex: none; display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: #ffc145; color: #2a1e00; font-weight: 800; }
+.fl-meet-list .no.start { background: var(--card); color: var(--ink); border: 2px solid var(--ink); }
+.fl-food-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 2px; width: 100%; }
+.fl-food-list li { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.luck-pin.goal span { color: #2a1e00; font-size: 11px; font-weight: 800; text-align: center; line-height: 16px; }

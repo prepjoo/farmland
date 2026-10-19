@@ -23,3 +23,13 @@ export const MESSAGE_KINDS = [
   { id: 'iching', label: '주역', count: 64 },
   { id: 'zodiac', label: '점성술', count: 12 },
 ];
+
+const TRIGRAM_DIR = { 감: '북', 간: '북동', 진: '동', 손: '남동', 리: '남', 곤: '남서', 태: '서', 건: '북서' }; // 후천팔괘 방위
+const WORDS8 = ['북', '북동', '동', '남동', '남', '남서', '서', '북서'];
+
+/** 오늘의 행운 방향(놀이용): 타로 = 카드 번호 × 360/22°를 8방위로, 주역 = 상괘의 후천팔괘 방위. 점성술은 없음 */
+export function luckyDirection(kind, card) {
+  if (kind === 'tarot') return WORDS8[Math.round(((card.n * 360) / 22) / 45) % 8];
+  if (kind === 'iching') return TRIGRAM_DIR[card.upper] ?? null;
+  return null;
+}

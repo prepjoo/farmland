@@ -8,14 +8,14 @@ test('메인: 여기·행복·행운 카드 3개와 바로가기, 오른쪽 위 
   await page.goto('/#/');
   await expect(page.locator('.home-card')).toHaveCount(3);
   await expect(page.locator('.home-pill')).toHaveText(['여기', '행복', '행운']);
-  await expect(page.getByRole('navigation', { name: '여기 바로가기' }).getByRole('link')).toHaveText(['여긴 어디?', '우리 어디?']);
+  await expect(page.getByRole('navigation', { name: '여기 바로가기' }).getByRole('link')).toHaveText(['여긴 어디?', '긴급 신고']);
   await expect(page.getByRole('navigation', { name: '행복 바로가기' }).getByRole('link')).toHaveText(['행복위치', '행복메시지', '추천장소']);
   await expect(page.getByRole('navigation', { name: '행운 바로가기' }).getByRole('link')).toHaveText(['행운위치', '행운번호', '행운장소']);
   await expect(page.locator('.home-card.happy')).toContainText('타로·주역·점성술');
   await expect(page.locator('header .top-quick > *').first()).toHaveClass(/sos/); // 긴급 신고가 메뉴 앞
   await page.getByRole('button', { name: '메뉴' }).click();
   const menu = page.getByRole('navigation', { name: '전체 메뉴' });
-  await expect(menu.getByRole('link')).toHaveText(['처음 화면', '여긴 어디?', '우리 어디?', '행복', '행운', '내 귀땅 마을', '국가지점번호란?']);
+  await expect(menu.getByRole('link')).toHaveText(['처음 화면', '여긴 어디?', '행복', '행운', '내 귀땅 마을', '국가지점번호란?']);
   await page.keyboard.press('Escape');
   await expect(menu).toHaveCount(0);
 });
@@ -27,8 +27,9 @@ test('메인 바로가기는 그 칸으로 간다', async ({ page }) => {
   await expect(page).toHaveURL(/#\/happy\/message$/);
   await expect(page.locator('#msg-h')).toBeInViewport();
   await page.goto('/#/');
-  await page.getByRole('link', { name: '우리 어디?' }).click();
-  await expect(page.locator('h1')).toHaveText('우리 어디?');
+  await expect(page.locator('.home-card.here')).not.toContainText('만남');
+  await page.goto('/#/meet'); // 옛 ‘우리 어디?’ 주소는 행복 추천장소로
+  await expect(page.locator('#meet-h')).toHaveText('추천장소');
 });
 
 test.describe('동작 줄이기', () => {
@@ -38,6 +39,8 @@ test.describe('동작 줄이기', () => {
     await prepare(page);
     await page.goto('/#/happy');
     await expect(page.locator('.privacy')).toContainText('이 기기 안에서만');
+    await expect(page.locator('.why-box')).toContainText('행복위치가 나에게 주는 것');
+    await expect(page.locator('.why-box li')).toHaveCount(3);
     await expect(page.getByRole('radiogroup', { name: '입력 방식' }).getByRole('radio')).toHaveText(['생년월일', '전화번호', 'MBTI']);
     await enterMeaning(page, { method: 'phone' });
     const n = await page.locator('.cand-list button').count();
@@ -78,6 +81,11 @@ test.describe('동작 줄이기', () => {
     await getAdvice(page, '점성술');
     await expect(page.locator('.fortune .card-name')).toContainText('자리');
     await expect(page.locator('.fortune')).toContainText('놀이용 추첨');
+    // 오늘의 운세처럼: 흐름 · 사람·관계 · 일·공부·돈 · 마음·건강 · 오늘의 작은 실천
+    await expect(page.locator('.reading-list dt')).toContainText(['오늘의 흐름', '사람·관계', '일·공부·돈', '마음·건강', '오늘의 작은 실천']);
+    await page.getByRole('radio', { name: '타로' }).click();
+    await getAdvice(page, '타로');
+    await expect(page.locator('.reading-list')).toContainText('행운의 방향');
   });
 
   test('오늘의 국가지점: 조언을 받으면 그곳과 미션이 제목 있는 칸으로 나온다', async ({ page }) => {
